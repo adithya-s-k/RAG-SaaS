@@ -1,0 +1,16 @@
+{
+  "experimental": {
+    "outputFileTracingIncludes": {
+      "/*": [
+        "./cache/**/*"
+      ],
+      "/api/**/*": [
+        "./node_modules/**/*.wasm"
+      ]
+    }
+  },
+  "output": "export",
+  "images": {
+    "unoptimized": true
+  }
+}
