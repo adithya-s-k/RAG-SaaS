@@ -1,21 +1,17 @@
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
 ## Getting Started
 
-First, install the dependencies:
+First, run the development server:
 
-```
-npm install
-```
-
-Second, generate the embeddings of the documents in the `./data` directory (if this folder exists - otherwise, skip this step):
-
-```
-npm run generate
-```
-
-Third, run the development server:
-
-```
+```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -24,46 +20,17 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Using Docker
-
-1. Build an image for the Next.js app:
-
-```
-docker build -t <your_app_image_name> .
-```
-
-2. Generate embeddings:
-
-Parse the data and generate the vector embeddings if the `./data` folder exists - otherwise, skip this step:
-
-```
-docker run \
-  --rm \
-  -v $(pwd)/.env:/app/.env \ # Use ENV variables and configuration from your file-system
-  -v $(pwd)/config:/app/config \
-  -v $(pwd)/data:/app/data \
-  -v $(pwd)/cache:/app/cache \ # Use your file system to store the vector database
-  <your_app_image_name> \
-  npm run generate
-```
-
-3. Start the app:
-
-```
-docker run \
-  --rm \
-  -v $(pwd)/.env:/app/.env \ # Use ENV variables and configuration from your file-system
-  -v $(pwd)/config:/app/config \
-  -v $(pwd)/cache:/app/cache \ # Use your file system to store gea vector database
-  -p 3000:3000 \
-  <your_app_image_name>
-```
-
 ## Learn More
 
-To learn more about LlamaIndex, take a look at the following resources:
+To learn more about Next.js, take a look at the following resources:
 
-- [LlamaIndex Documentation](https://docs.llamaindex.ai) - learn about LlamaIndex (Python features).
-- [LlamaIndexTS Documentation](https://ts.llamaindex.ai) - learn about LlamaIndex (Typescript features).
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the LlamaIndexTS GitHub repository](https://github.com/run-llama/LlamaIndexTS) - your feedback and contributions are welcome!
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
