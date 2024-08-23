@@ -1,4 +1,6 @@
-# RAG-SaaS: Ship RAG Applications Quickly
+# RAG-SaaS: Ship RAG Solutions Quickly
+
+![RAG SAAS](./assets/banner.png)
 
 [![GitHub Stars](https://img.shields.io/github/stars/adithya-s-k/RAG-SaaS?style=social)](https://github.com/adithya-s-k/RAG-SaaS/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/adithya-s-k/RAG-SaaS?style=social)](https://github.com/adithya-s-k/RAG-SaaS/network/members)
