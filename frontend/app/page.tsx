@@ -20,17 +20,11 @@ export default function Home() {
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setTimeout(() => {
-      // if (isAuthenticated) {
-      //   router.push(`/chat?query=${encodeURIComponent(inputValue)}`);
-      // } else {
-      //   router.push(`/signin`);
-      // }
-    }, 1500); // 1500 milliseconds = 1.5 seconds
+    setTimeout(() => {}, 1500);
   };
   return (
     <>
-      <div className="w-screen h-screen flex flex-col justify-center items-center">
+      <div className="w-screen h-full flex flex-col justify-center items-center">
         <Image
           src={
             theme === 'dark'
@@ -42,7 +36,7 @@ export default function Home() {
           height="1080"
           className="p-10 md:p-0 md:h-1/5 md:w-1/5 object-contain"
         />
-        <div className="w-full mt-10 p-4">
+        {/* <div className="w-full mt-10 p-4">
           <PlaceholdersAndVanishInput
             placeholders={placeholders}
             onChange={handleChange}
@@ -50,7 +44,7 @@ export default function Home() {
             value={inputValue}
             setValue={setInputValue}
           />
-        </div>
+        </div> */}
       </div>
     </>
   );

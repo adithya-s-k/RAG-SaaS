@@ -6,11 +6,12 @@ import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import BannerCard from '@/components/banner-card';
 
 export default function SignUp() {
   const { theme, setTheme } = useTheme();
   return (
-    <div className="flex min-h-screen w-full flex-col lg:flex-row">
+    <div className="flex h-full w-full flex-col lg:flex-row">
       <div className="flex flex-1 items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-[400px] space-y-6">
           <div className="space-y-2 text-center">
@@ -60,17 +61,7 @@ export default function SignUp() {
         </div>
       </div>
       <div className="hidden flex-1 lg:flex justify-center items-center bg-muted">
-        <Image
-          src={
-            theme === 'dark'
-              ? '/images/banner_dark.png'
-              : '/images/banner_light.png'
-          }
-          alt="Image"
-          width="1080"
-          height="1080"
-          className="h-1/2 w-1/2 object-contain"
-        />
+        <BannerCard></BannerCard>
       </div>
     </div>
   );

@@ -228,7 +228,7 @@ export default function ChatInput(
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-3xl  p-4 shadow-md shadow-black/10 space-y-4 shrink-0 border-2 border-slate-500/10"
+      className="rounded-3xl p-2 shadow-md shadow-black/10 space-y-4 shrink-0 border-2 border-slate-500/10 bg-background"
     >
       {imageUrl && (
         <UploadImagePreview url={imageUrl} onRemove={() => setImageUrl(null)} />
@@ -249,7 +249,8 @@ export default function ChatInput(
           ref={textareaRef}
           name="message"
           placeholder="Type a message"
-          className="flex-1 overflow-y-auto resize-none rounded-2xl bg-transparent"
+          // className="flex-1 overflow-y-auto resize-none rounded-2xl bg-transparent"
+          className="flex-1 resize-none rounded-2xl bg-transparent focus:outline-none focus:ring-0"
           rows={1}
           value={props.input}
           onChange={handleInputChange}
@@ -259,7 +260,13 @@ export default function ChatInput(
               onSubmit(e as any);
             }
           }}
-          style={{ minHeight: '30px', maxHeight: '200px', overflow: 'hidden' }}
+          style={{
+            minHeight: '30px',
+            maxHeight: '200px',
+            overflow: 'hidden',
+            border: 'none',
+            boxShadow: 'none',
+          }}
         />
         {/* <FileUploader
           onFileUpload={handleUploadFile}
@@ -273,7 +280,7 @@ export default function ChatInput(
           type="submit"
           disabled={props.isLoading || !props.input.trim()}
           // className="rounded-xl border-2 flex items-center justify-center"
-          className="w-fit h-fit rounded-full"
+          className="w-fit h-[35px] rounded-2xl"
         >
           <CornerRightUp />
         </Button>
