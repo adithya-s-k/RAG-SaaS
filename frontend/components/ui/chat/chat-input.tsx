@@ -279,10 +279,9 @@ export default function ChatInput(
         <Button
           type="submit"
           disabled={props.isLoading || !props.input.trim()}
-          // className="rounded-xl border-2 flex items-center justify-center"
           className="w-fit h-fit rounded-2xl"
         >
-          <CornerRightUp />
+          <CornerRightUp className="w-5 h-5 font-bold" />
         </Button>
       </div>
     </form>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import useAuthenticatedFetch from '@/utils/authenticatedFetch';
+import useAuthenticatedFetch from '@/hooks/authenticatedFetch';
 interface Conversation {
   _id: string;
   summary: string;

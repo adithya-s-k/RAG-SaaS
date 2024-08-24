@@ -9,7 +9,7 @@ import { useClientConfig } from '@/components/ui/chat/hooks/use-config';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useConversationContext } from '@/app/ConversationContext';
-import useAuthenticatedFetch from '@/utils/authenticatedFetch';
+import useAuthenticatedFetch from '@/hooks/authenticatedFetch';
 import { useAuth } from '@/app/authProvider';
 import Loading from '@/components/loading';
 
@@ -117,8 +117,8 @@ function Chat() {
 
   return (
     <>
-      <div className="w-screen h-full flex justify-center items-center bg-muted">
-        <div className="space-y-4 w-full md:w-[75%] lg:w-[60%] h-full flex flex-col p-4">
+      <div className="w-screen h-full flex justify-center items-center bg-primary-foreground">
+        <div className="space-y-2 w-full md:w-[75%] lg:w-[60%] h-full flex flex-col p-4">
           <ChatMessages
             messages={messages}
             isLoading={isLoading}

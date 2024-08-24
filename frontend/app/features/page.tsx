@@ -1,48 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { HoverEffect } from '@/components/ui/card-hover-effect';
 import { Features } from '@/config/features';
-import ShimmerButton from '@/components/magicui/shimmer-button';
-
-// async function getGitHubStars(): Promise<string | null> {
-//   try {
-//     const response = await fetch(
-//       'https://api.github.com/repos/shadcn/taxonomy',
-//       {
-//         headers: {
-//           Accept: 'application/vnd.github+json',
-//           Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
-//         },
-//         next: {
-//           revalidate: 60,
-//         },
-//       }
-//     );
-
-//     if (!response?.ok) {
-//       return null;
-//     }
-
-//     const json = await response.json();
-
-//     return parseInt(json['stargazers_count']).toLocaleString();
-//   } catch (error) {
-//     return null;
-//   }
-// }
+import NumberTicker from '@/components/magicui/number-ticker';
+import { Github, StarIcon } from 'lucide-react';
+import useGitHubStars from '@/hooks/useGitHubStars';
 
 // eslint-disable-next-line @next/next/no-async-client-component
 export default function IndexPage() {
-  // const stars = await getGitHubStars();
-
+  const stars = useGitHubStars('adithya-s-k/RAG-SaaS');
   return (
     <>
-      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
+      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 min-h-screen md:h-fit flex flex-col justify-center">
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center">
           <Link
             href={siteConfig.links.twitter}
@@ -79,22 +52,42 @@ export default function IndexPage() {
             Ship RAG Solutions ⚡Quickly
           </h1>
           <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            RAG-SaaS offers a ready-to-use template for building
-            Retrieval-Augmented Generation applications. It streamlines
-            deployment for developers, handling infrastructure so you can focus
-            on your RAG system.
+            RAG-SaaS is an end-to-end platform for building Retrieval-Augmented
+            Generation (RAG) applications. It simplifies deployment, allowing
+            developers to focus on optimizing their RAG systems.
           </p>
-          <div className="space-x-4">
-            <Link href="/signin" className={cn(buttonVariants({ size: 'lg' }))}>
+          <div className="space-x-4 flex">
+            <Link
+              href="/signin"
+              className={cn(
+                buttonVariants(),
+                'w-fit gap-2 overflow-hidden whitespace-pre md:flex',
+                'group relative w-fit justify-center gap-2 rounded-md transition-all duration-300 ease-out hover:ring-2 hover:ring-primary hover:ring-offset-2'
+              )}
+            >
               Get Started
             </Link>
             <Link
-              href={siteConfig.links.github}
+              className={cn(
+                buttonVariants(),
+                'max-w-52 gap-2 overflow-hidden whitespace-pre md:flex',
+                'group relative w-full justify-center gap-2 rounded-md transition-all duration-300 ease-out hover:ring-2 hover:ring-primary hover:ring-offset-2'
+              )}
               target="_blank"
-              rel="noreferrer"
-              className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
+              href={siteConfig.links.github}
             >
-              GitHub
+              <span className="absolute right-0 -mt-12 h-32 w-8 translate-x-12 rotate-12 bg-white opacity-10 transition-all duration-1000 ease-out group-hover:-translate-x-40" />
+              <div className="flex items-center">
+                <Github></Github>
+                <span className="ml-1">Star on GitHub</span>{' '}
+              </div>
+              <div className="ml-2 flex items-center gap-1 text-sm md:flex">
+                <StarIcon className="size-4 text-gray-500 transition-all duration-300 group-hover:text-yellow-300" />
+                <NumberTicker
+                  value={stars}
+                  className="font-display font-medium text-white dark:text-black"
+                />
+              </div>
             </Link>
           </div>
         </div>

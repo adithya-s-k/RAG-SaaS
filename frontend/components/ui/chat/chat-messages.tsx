@@ -58,59 +58,61 @@ export default function ChatMessages(
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   return (
-    <div
-      className="flex-1 w-full md:p-4 relative overflow-y-auto"
-      ref={scrollableChatContainerRef}
-    >
-      <div className="flex flex-col divide-y">
-        {props.messages.map((m, i) => {
-          const isLoadingMessage = i === messageLength - 1 && props.isLoading;
-          return (
-            <ChatMessage
-              key={m.id}
-              chatMessage={m}
-              isLoading={isLoadingMessage}
-              append={props.append!}
-              updateMessageContent={props.updateMessageContent!}
+    <ScrollArea className="flex-1 w-full relative">
+      <div
+        className="flex-1 w-full md:p-4 relative overflow-y-auto "
+        ref={scrollableChatContainerRef}
+      >
+        <div className="flex flex-col divide-y">
+          {props.messages.map((m, i) => {
+            const isLoadingMessage = i === messageLength - 1 && props.isLoading;
+            return (
+              <ChatMessage
+                key={m.id}
+                chatMessage={m}
+                isLoading={isLoadingMessage}
+                append={props.append!}
+                updateMessageContent={props.updateMessageContent!}
+              />
+            );
+          })}
+          {isPending && (
+            <div className="flex justify-center items-center pt-10">
+              <Loader2 className="h-4 w-4 animate-spin" />
+            </div>
+          )}
+        </div>
+        {(showReload || showStop) && (
+          <div className="flex justify-end py-4">
+            <ChatActions
+              reload={props.reload}
+              stop={props.stop}
+              showReload={showReload}
+              showStop={showStop}
             />
-          );
-        })}
-        {isPending && (
-          <div className="flex justify-center items-center pt-10">
-            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        )}
+        {!messageLength && starterQuestions?.length && props.append && (
+          <div className="absolute bottom-6 left-0 w-full">
+            <div className="grid grid-cols-1 gap-2 mx-4 max-w-full overflow-auto">
+              {starterQuestions
+                .slice(0, isMobile ? 3 : starterQuestions.length)
+                .map((question, i) => (
+                  <Button
+                    variant="outline"
+                    key={i}
+                    onClick={() =>
+                      props.append!({ role: 'user', content: question })
+                    }
+                    className="w-full whitespace-normal p-2 h-fit"
+                  >
+                    {question}
+                  </Button>
+                ))}
+            </div>
           </div>
         )}
       </div>
-      {(showReload || showStop) && (
-        <div className="flex justify-end py-4">
-          <ChatActions
-            reload={props.reload}
-            stop={props.stop}
-            showReload={showReload}
-            showStop={showStop}
-          />
-        </div>
-      )}
-      {!messageLength && starterQuestions?.length && props.append && (
-        <div className="absolute bottom-6 left-0 w-full">
-          <div className="grid grid-cols-1 gap-2 mx-4 max-w-full overflow-auto">
-            {starterQuestions
-              .slice(0, isMobile ? 3 : starterQuestions.length)
-              .map((question, i) => (
-                <Button
-                  variant="outline"
-                  key={i}
-                  onClick={() =>
-                    props.append!({ role: 'user', content: question })
-                  }
-                  className="w-full whitespace-normal p-2 h-fit"
-                >
-                  {question}
-                </Button>
-              ))}
-          </div>
-        </div>
-      )}
-    </div>
+    </ScrollArea>
   );
 }

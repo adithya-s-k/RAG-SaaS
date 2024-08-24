@@ -1,20 +1,20 @@
-import { Check, Copy } from "lucide-react";
-import { useMemo } from "react";
-import { Button } from "../../button";
+import { Check, Copy } from 'lucide-react';
+import { useMemo } from 'react';
+import { Button } from '../../button';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "../../hover-card";
-import { useCopyToClipboard } from "../hooks/use-copy-to-clipboard";
-import { SourceData } from "../index";
-import PdfDialog from "../widgets/PdfDialog";
+} from '../../hover-card';
+import { useCopyToClipboard } from '../hooks/use-copy-to-clipboard';
+import { SourceData } from '../index';
+import PdfDialog from '../widgets/PdfDialog';
 
 const SCORE_THRESHOLD = 0.3;
 
 function SourceNumberButton({ index }: { index: number }) {
   return (
-    <div className="text-xs w-5 h-5 rounded-full bg-gray-100 mb-2 flex items-center justify-center hover:text-white hover:bg-primary hover:cursor-pointer">
+    <div className="text-xs w-5 h-5 rounded-full text-accent-foreground bg-background mb-2 flex items-center justify-center hover:text-primary-foreground hover:bg-secondary-foreground hover:cursor-pointer">
       {index + 1}
     </div>
   );
@@ -54,7 +54,7 @@ export function ChatSources({ data }: { data: SourceData }) {
       <span className="font-semibold">Sources:</span>
       <div className="inline-flex gap-1 items-center">
         {sources.map((nodeInfo: NodeInfo, index: number) => {
-          if (nodeInfo.url?.endsWith(".pdf")) {
+          if (nodeInfo.url?.endsWith('.pdf')) {
             return (
               <PdfDialog
                 key={nodeInfo.id}

@@ -6,7 +6,7 @@ export const siteConfig: SiteConfig = {
   url: 'https://rag.cognitivelab.in/',
   ogImage: 'https://rag.cognitivelab.in/og.jpg',
   links: {
-    twitter: 'https://x.com/cognitivelab_ai',
+    twitter: 'https://x.com/adithya_s_k',
     github: 'https://github.com/adithya-s-k/RAG-SaaS',
   },
 };

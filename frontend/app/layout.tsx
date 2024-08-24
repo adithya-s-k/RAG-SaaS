@@ -55,7 +55,7 @@ export default function RootLayout({
         <Analytics />
         <AuthProvider>
           <ConversationProvider>
-            <body className={`${inter.className} flex flex-col h-screen `}>
+            <body className={`${inter.className} flex flex-col h-screen`}>
               <Toaster position="top-center" />
               <Header />
               <main className="h-full overflow-x-hidden">{children}</main>
