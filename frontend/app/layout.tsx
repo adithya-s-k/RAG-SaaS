@@ -13,30 +13,30 @@ import { useState } from 'react';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  ),
-  // ... rest of your metadata
+  metadataBase: process.env.VERCEL_URL
+    ? new URL(`https://${process.env.VERCEL_URL}`)
+    : undefined,
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  keywords: ['RAG', 'SAAS', 'RAG SAAS', 'AI SAAS', 'llamaindex'],
+  authors: [
+    {
+      name: 'Adithya S Kolavi',
+      url: 'https://adithyask.com',
+    },
+  ],
+  creator: 'Adithya S K',
 };
-// export const metadata: Metadata = {
-//   metadataBase: process.env.VERCEL_URL
-//     ? new URL(`https://${process.env.VERCEL_URL}`)
-//     : undefined,
-//   title: {
-//     default: siteConfig.name,
-//     template: `%s | ${siteConfig.name}`,
-//   },
-//   description: siteConfig.description,
-//   keywords: ['RAG', 'SAAS', 'RAG SAAS', 'AI SAAS', 'llamaindex'],
-//   authors: [
-//     {
-//       name: 'Adithya S Kolavi',
-//       url: 'https://adithyask.com',
-//     },
-//   ],
-//   creator: 'Adithya S K',
-//   manifest: `${siteConfig.url}/site.webmanifest`,
-// };
+
+export const viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: 'black' },
+  ],
+};
 
 export default function RootLayout({
   children,

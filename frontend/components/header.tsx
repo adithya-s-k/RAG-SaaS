@@ -18,6 +18,7 @@ import {
   AlignLeft,
   MessageSquare,
 } from 'lucide-react';
+import { Separator } from './ui/separator';
 
 export function Header() {
   const { theme, setTheme } = useTheme();
@@ -91,8 +92,8 @@ export function Header() {
         </button>
       </div>
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-background backdrop-blur-sm md:hidden w-screen">
-          <div className="fixed inset-y-0 right-0 bg-muted p-2 shadow-lg h-fit w-screen">
+        <div className="fixed inset-0 z-50  backdrop-blur-sm md:hidden w-screen">
+          <div className="fixed inset-y-0 right-0 bg-primary-foreground p-2 shadow-lg h-fit w-screen">
             <div className="flex items-center justify-between">
               <Link href="/" className="flex items-center space-x-2">
                 <Image
@@ -130,7 +131,8 @@ export function Header() {
                 >
                   <Link href="/signin">Sign In</Link>
                 </Button>
-                <a
+                <Separator />
+                <Link
                   href="https://github.com/adithya-s-k/RAG-SaaS"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -141,7 +143,7 @@ export function Header() {
                 >
                   <Github className="mr-2 h-5 w-5" />
                   GitHub
-                </a>
+                </Link>
                 <Button
                   variant="ghost"
                   onClick={toggleTheme}
@@ -158,14 +160,6 @@ export function Header() {
                       Dark Mode
                     </>
                   )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={toggleChatHistory}
-                  className="w-full justify-start"
-                >
-                  <MessageSquare className="mr-2 h-5 w-5" />
-                  Toggle Chat History
                 </Button>
               </div>
             </div>
