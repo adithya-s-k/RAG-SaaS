@@ -9,9 +9,12 @@ import logging
 import os
 
 import uvicorn
-from app.api.chat_router.chat import chat_router
-from app.api.chat_router.chat_config import config_router
-from app.api.chat_router.upload import file_upload_router
+from app.api.chat import chat_router
+from app.api.chat import config_router
+from app.api.chat import file_upload_router
+from app.api.auth import auth_router
+from app.api.conversation import conversation_router
+from app.api.admin import admin_router
 from app.observability import init_observability
 from app.settings import init_settings
 from fastapi import FastAPI
@@ -54,13 +57,16 @@ def mount_static_files(directory, path):
 
 
 # Mount the data files to serve the file viewer
-# mount_static_files(DATA_DIR, "/api/files/data")
+mount_static_files(DATA_DIR, "/api/files/data")
 # Mount the output files from tools
-# mount_static_files("output", "/api/files/output")
+mount_static_files("output", "/api/files/output")
 
 app.include_router(chat_router, prefix="/api/chat")
 app.include_router(config_router, prefix="/api/chat/config")
 app.include_router(file_upload_router, prefix="/api/chat/upload")
+app.include_router(auth_router, prefix="/api/auth")
+app.include_router(conversation_router, prefix="/api/conversation")
+app.include_router(admin_router, prefix="/api/admin")
 
 if __name__ == "__main__":
     app_host = os.getenv("APP_HOST", "0.0.0.0")

@@ -5,14 +5,14 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request,
 from llama_index.core.chat_engine.types import BaseChatEngine, NodeWithScore
 from llama_index.core.llms import MessageRole
 
-from app.api.chat_router.events import EventCallbackHandler
-from app.api.chat_router.models import (
+from app.api.chat.events import EventCallbackHandler
+from app.api.chat.models import (
     ChatData,
     Message,
     Result,
     SourceNodes,
 )
-from app.api.chat_router.vercel_response import VercelStreamResponse
+from app.api.chat.vercel_response import VercelStreamResponse
 from app.engine import get_chat_engine
 from app.engine.query_filter import generate_filters
 

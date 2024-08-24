@@ -13,8 +13,11 @@ import useAuthenticatedFetch from '@/hooks/authenticatedFetch';
 import { useAuth } from '@/app/authProvider';
 import Loading from '@/components/loading';
 
-function Chat() {
-  const { fetchUsage } = useConversationContext();
+export default function Chat({
+  params,
+}: {
+  params: { conversationId: string };
+}) {
   const authenticatedFetch = useAuthenticatedFetch();
   const { isAuthenticated, accessToken } = useAuth();
   const { backend } = useClientConfig();
@@ -117,35 +120,29 @@ function Chat() {
 
   return (
     <>
-      <div className="w-screen h-full flex justify-center items-center bg-primary-foreground">
-        <div className="space-y-2 w-full md:w-[75%] lg:w-[60%] h-full flex flex-col p-4">
-          <ChatMessages
-            messages={messages}
-            isLoading={isLoading}
-            reload={reload}
-            stop={stop}
-            append={append}
-            updateMessageContent={updateMessageContent}
-          />
-          <ChatInput
-            input={input}
-            handleSubmit={handleSubmit}
-            handleInputChange={handleInputChange}
-            isLoading={isLoading}
-            messages={messages}
-            append={append}
-            setInput={setInput}
-          />
+      <Suspense fallback={<Loading />}>
+        <div className="w-screen h-full flex justify-center items-center bg-primary-foreground">
+          <div className="space-y-2 w-full md:w-[75%] lg:w-[60%] h-full flex flex-col p-4">
+            <ChatMessages
+              messages={messages}
+              isLoading={isLoading}
+              reload={reload}
+              stop={stop}
+              append={append}
+              updateMessageContent={updateMessageContent}
+            />
+            <ChatInput
+              input={input}
+              handleSubmit={handleSubmit}
+              handleInputChange={handleInputChange}
+              isLoading={isLoading}
+              messages={messages}
+              append={append}
+              setInput={setInput}
+            />
+          </div>
         </div>
-      </div>
+      </Suspense>
     </>
-  );
-}
-
-export default function UsingChatTest() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <Chat />
-    </Suspense>
   );
 }
