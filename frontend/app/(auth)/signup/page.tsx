@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import BannerCard from '@/components/banner-card';
+import { ArrowLeft } from 'lucide-react';
 
 export default function SignUp() {
   const { theme, setTheme } = useTheme();
@@ -14,6 +15,12 @@ export default function SignUp() {
     <div className="flex h-full w-full flex-col lg:flex-row">
       <div className="flex flex-1 items-center justify-center p-6 lg:p-12">
         <div className="w-full max-w-[400px] space-y-6">
+          <Button variant="ghost" className="mb-4" asChild>
+            <Link href="/">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold">Sign Up</h1>
             <p className="text-balance text-muted-foreground">

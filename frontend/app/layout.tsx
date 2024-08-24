@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 import { Header } from '@/components/header';
+import { useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 

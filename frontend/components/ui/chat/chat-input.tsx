@@ -250,7 +250,7 @@ export default function ChatInput(
           name="message"
           placeholder="Type a message"
           // className="flex-1 overflow-y-auto resize-none rounded-2xl bg-transparent"
-          className="flex-1 resize-none rounded-2xl bg-transparent focus:outline-none focus:ring-0"
+          className="flex-1 resize-none rounded-2xl bg-transparent focus:outline-none focus:ring-0 text-base"
           rows={1}
           value={props.input}
           onChange={handleInputChange}
@@ -280,7 +280,7 @@ export default function ChatInput(
           type="submit"
           disabled={props.isLoading || !props.input.trim()}
           // className="rounded-xl border-2 flex items-center justify-center"
-          className="w-fit h-[35px] rounded-2xl"
+          className="w-fit h-fit rounded-2xl"
         >
           <CornerRightUp />
         </Button>

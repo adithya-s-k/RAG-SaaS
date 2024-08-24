@@ -118,7 +118,7 @@ function Chat() {
   return (
     <>
       <div className="w-screen h-full flex justify-center items-center bg-muted">
-        <div className="space-y-4 lg:w-[75%] h-full flex flex-col p-4">
+        <div className="space-y-4 w-full md:w-[75%] lg:w-[60%] h-full flex flex-col p-4">
           <ChatMessages
             messages={messages}
             isLoading={isLoading}
