@@ -10,7 +10,7 @@ import { useTheme } from 'next-themes';
 const BannerCard: React.FC = () => {
   const { theme, setTheme } = useTheme();
   return (
-    <div className="h-fit w-1/2 p-10 border bg-background rounded-xl shadow-md flex flex-col justify-center items-center gap-6">
+    <div className="h-fit w-1/2 p-10 shadow-md bg-background rounded-xl  flex flex-col justify-center items-center gap-6">
       <Image
         src={
           theme === 'dark'

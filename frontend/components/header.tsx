@@ -154,6 +154,8 @@ import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
+import ShinyButton from '@/components/magicui/shiny-button';
+
 import {
   Github,
   Sun,
@@ -211,10 +213,8 @@ export function Header() {
             href="https://github.com/adithya-s-k/RAG-SaaS"
             target="_blank"
             rel="noopener noreferrer"
-            className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
           >
-            <Github className="h-5 w-5" />
-            <span className="sr-only">GitHub</span>
+            <ShinyButton text="Star us on Github ⭐" className="" />
           </a>
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === 'dark' ? (
