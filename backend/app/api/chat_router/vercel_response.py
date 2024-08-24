@@ -5,8 +5,8 @@ from fastapi import Request
 from fastapi.responses import StreamingResponse
 from llama_index.core.chat_engine.types import StreamingAgentChatResponse
 
-from app.api.chat.events import EventCallbackHandler
-from app.api.chat.models import ChatData, Message, SourceNodes
+from app.api.chat_router.events import EventCallbackHandler
+from app.api.chat_router.models import ChatData, Message, SourceNodes
 from app.api.services.suggestion import NextQuestionSuggestion
 
 

@@ -9,9 +9,9 @@ import logging
 import os
 
 import uvicorn
-from app.api.chat.chat import chat_router
-from app.api.chat.chat_config import config_router
-from app.api.chat.upload import file_upload_router
+from app.api.chat_router.chat import chat_router
+from app.api.chat_router.chat_config import config_router
+from app.api.chat_router.upload import file_upload_router
 from app.observability import init_observability
 from app.settings import init_settings
 from fastapi import FastAPI
@@ -54,9 +54,9 @@ def mount_static_files(directory, path):
 
 
 # Mount the data files to serve the file viewer
-mount_static_files(DATA_DIR, "/api/files/data")
+# mount_static_files(DATA_DIR, "/api/files/data")
 # Mount the output files from tools
-mount_static_files("output", "/api/files/output")
+# mount_static_files("output", "/api/files/output")
 
 app.include_router(chat_router, prefix="/api/chat")
 app.include_router(config_router, prefix="/api/chat/config")
