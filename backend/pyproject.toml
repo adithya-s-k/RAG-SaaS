@@ -10,12 +10,14 @@ readme = "README.md"
 generate = "app.engine.generate:generate_datasource"
 
 [tool.poetry.dependencies]
-python = "^3.11,<4.0"
+python = ">=3.11,<3.12"
 fastapi = "^0.109.1"
 python-dotenv = "^1.0.0"
 aiostream = "^0.5.2"
 llama-index = "0.10.58"
 cachetools = "^5.3.3"
+pymongo = "^4.8.0"
+motor = "^3.5.1"
 
 [tool.poetry.dependencies.uvicorn]
 extras = [ "standard" ]
