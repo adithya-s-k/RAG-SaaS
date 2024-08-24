@@ -1,20 +1,19 @@
 import os
-from llama_index.vector_stores.mongodb import MongoDBAtlasVectorSearch
+from llama_index.vector_stores.qdrant import QdrantVectorStore
 
 
 def get_vector_store():
-    db_uri = os.getenv("MONGODB_URI")
-    db_name = os.getenv("MONGODB_DATABASE")
-    collection_name = os.getenv("MONGODB_VECTORS")
-    index_name = os.getenv("MONGODB_VECTOR_INDEX")
-    if not db_uri or not db_name or not collection_name or not index_name:
+    collection_name = os.getenv("QDRANT_COLLECTION")
+    url = os.getenv("QDRANT_URL")
+    api_key = os.getenv("QDRANT_API_KEY")
+    if not collection_name or not url:
         raise ValueError(
-            "Please set MONGODB_URI, MONGODB_DATABASE, MONGODB_VECTORS, and MONGODB_VECTOR_INDEX"
-            " to your environment variables or config them in .env file"
+            "Please set QDRANT_COLLECTION, QDRANT_URL"
+            " to your environment variables or config them in the .env file"
         )
-    store = MongoDBAtlasVectorSearch(
-        db_name=db_name,
+    store = QdrantVectorStore(
         collection_name=collection_name,
-        index_name=index_name,
+        url=url,
+        api_key=api_key,
     )
     return store

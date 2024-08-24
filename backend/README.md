@@ -1,3 +1,5 @@
+This is a [LlamaIndex](https://www.llamaindex.ai/) project using [FastAPI](https://fastapi.tiangolo.com/) bootstrapped with [`create-llama`](https://github.com/run-llama/LlamaIndexTS/tree/main/packages/create-llama).
+
 ## Getting Started
 
 First, setup the environment with poetry:
