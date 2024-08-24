@@ -16,23 +16,11 @@ interface ConversationsByDate {
   before_that: Conversation[];
 }
 
-interface UsageData {
-  chats: number;
-  total_chats: number;
-  file_uploads: number;
-  total_file_uploads: number;
-  history: number;
-  total_history: number;
-}
-
 interface ConversationContextProps {
   conversationList: ConversationsByDate;
   setConversationList: React.Dispatch<
     React.SetStateAction<ConversationsByDate>
   >;
-  usageData: UsageData;
-  setUsageData: React.Dispatch<React.SetStateAction<UsageData>>;
-  fetchUsage: () => Promise<void>;
 }
 
 const ConversationContext = createContext<ConversationContextProps | undefined>(
@@ -64,56 +52,12 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       before_that: [],
     }
   );
-  const authenticatedFetch = useAuthenticatedFetch();
-  const [usageData, setUsageData] = useState<UsageData>({
-    chats: 0,
-    total_chats: 0,
-    file_uploads: 0,
-    total_file_uploads: 0,
-    history: 0,
-    total_history: 0,
-  });
-  // const fetchUsage = async () => {
-  //   try {
-  //     const response = await authenticatedFetch('/api/chat/usage');
-  //     if (!response) return;
-  //     if (!response.ok) {
-  //       throw new Error(
-  //         `Failed to fetch conversations: ${response.statusText}`
-  //       );
-  //     }
-  //     const data = await response.json();
-  //     console.log('Usage of the user:', data);
-  //   } catch (error) {
-  //     console.error('Error fetching conversations:', error);
-  //   }
-  // };
-
-  const fetchUsage = async () => {
-    try {
-      const response = await authenticatedFetch('/api/chat/usage');
-      if (!response?.ok) {
-        throw new Error(`Failed to fetch usage: ${response?.statusText}`);
-      }
-      const data = await response.json();
-      setUsageData(data);
-    } catch (error) {
-      console.error('Error fetching usage:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsage();
-  }, []);
 
   return (
     <ConversationContext.Provider
       value={{
         conversationList,
         setConversationList,
-        usageData,
-        setUsageData,
-        fetchUsage,
       }}
     >
       {children}
