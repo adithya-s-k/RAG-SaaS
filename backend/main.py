@@ -9,9 +9,9 @@ import logging
 import os
 
 import uvicorn
-from app.api.routers.chat import chat_router
-from app.api.routers.chat_config import config_router
-from app.api.routers.upload import file_upload_router
+from app.api.chat.chat import chat_router
+from app.api.chat.chat_config import config_router
+from app.api.chat.upload import file_upload_router
 from app.observability import init_observability
 from app.settings import init_settings
 from fastapi import FastAPI

@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from app.api.routers.models import Message
+from app.api.chat.models import Message
 from llama_index.core.prompts import PromptTemplate
 from llama_index.core.settings import Settings
 from pydantic import BaseModel

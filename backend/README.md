@@ -48,7 +48,7 @@ curl --location 'localhost:8000/api/chat/request' \
 --data '{ "messages": [{ "role": "user", "content": "Hello" }] }'
 ```
 
-You can start editing the API endpoints by modifying `app/api/routers/chat.py`. The endpoints auto-update as you save the file. You can delete the endpoint you're not using.
+You can start editing the API endpoints by modifying `app/api/chat/chat.py`. The endpoints auto-update as you save the file. You can delete the endpoint you're not using.
 
 Open [http://localhost:8000/docs](http://localhost:8000/docs) with your browser to see the Swagger UI of the API.
 

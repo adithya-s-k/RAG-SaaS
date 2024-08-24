@@ -3,7 +3,7 @@ import os
 
 from fastapi import APIRouter
 
-from app.api.routers.models import ChatConfig
+from app.api.chat.models import ChatConfig
 
 
 config_router = r = APIRouter()
