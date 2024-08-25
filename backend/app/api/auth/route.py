@@ -95,6 +95,16 @@ async def get_me(user: User = Depends(get_current_user)):
     return user
 
 
+@auth_router.get("/verify-admin", response_model=dict)
+async def verify_admin(current_user: User = Depends(get_current_user)):
+    if not current_user.role or current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not an admin",
+        )
+    return {"isAdmin": True}
+
+
 @auth_router.post("/update", summary="Update User", response_model=UserOut)
 async def update_user(data: UserUpdate, user: User = Depends(get_current_user)):
     try:
