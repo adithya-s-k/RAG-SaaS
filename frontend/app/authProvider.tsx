@@ -2,19 +2,14 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import axios from 'axios';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  accessToken: string | null;
   email: string | null;
   firstName: string | null;
   lastName: string | null;
-  login: (
-    token: string,
-    email: string,
-    firstName: string,
-    lastName: string
-  ) => void;
+  login: (email: string, firstName: string, lastName: string) => void;
   logout: () => void;
 }
 
@@ -26,75 +21,80 @@ const publicRoutes = [
   '/about-us',
   '/plans',
   '/signup',
+  '/signin',
   '/features',
   '/verifiedEmail',
 ];
-// '/contact-us',
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [lastName, setLastName] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    const storedEmail = localStorage.getItem('email');
-    const storedFirstName = localStorage.getItem('firstName');
-    const storedLastName = localStorage.getItem('lastName');
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/check-auth`,
+  //         { withCredentials: true }
+  //       );
+  //       if (response.data.authenticated) {
+  //         setIsAuthenticated(true);
+  //         const userResponse = await axios.get(
+  //           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/user`,
+  //           { withCredentials: true }
+  //         );
+  //         setEmail(userResponse.data.email);
+  //         setFirstName(userResponse.data.first_name);
+  //         setLastName(userResponse.data.last_name);
+  //       } else {
+  //         setIsAuthenticated(false);
+  //         if (!publicRoutes.includes(pathname)) {
+  //           router.push('/signin');
+  //         }
+  //       }
+  //     } catch (error) {
+  //       setIsAuthenticated(false);
+  //       if (!publicRoutes.includes(pathname)) {
+  //         router.push('/signin');
+  //       }
+  //     }
+  //   };
 
-    if (token && storedEmail) {
-      setIsAuthenticated(true);
-      setAccessToken(token);
-      setEmail(storedEmail);
-      setFirstName(storedFirstName);
-      setLastName(storedLastName);
-    } else {
-      setIsAuthenticated(false);
-      if (!publicRoutes.includes(pathname)) {
-        router.push('/signin');
-      }
-    }
-  }, [router, pathname]);
+  //   checkAuth();
+  // }, [router, pathname]);
 
-  const login = (
-    token: string,
-    email: string,
-    firstName: string,
-    lastName: string
-  ) => {
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('email', email);
-    localStorage.setItem('firstName', firstName);
-    localStorage.setItem('lastName', lastName);
+  const login = (email: string, firstName: string, lastName: string) => {
     setIsAuthenticated(true);
-    setAccessToken(token);
     setEmail(email);
     setFirstName(firstName);
     setLastName(lastName);
   };
 
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('email');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('lastName');
-    setIsAuthenticated(false);
-    setAccessToken(null);
-    setEmail(null);
-    setFirstName(null);
-    setLastName(null);
-    router.push('/signin');
+  const logout = async () => {
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+      setIsAuthenticated(false);
+      setEmail(null);
+      setFirstName(null);
+      setLastName(null);
+      router.push('/signin');
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        accessToken,
         email,
         firstName,
         lastName,
@@ -119,7 +119,6 @@ export const useRequireAuth = () => {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  console.log(pathname);
 
   useEffect(() => {
     if (!isAuthenticated && !publicRoutes.includes(pathname)) {
