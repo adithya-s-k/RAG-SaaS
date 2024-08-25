@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import useAuthenticatedFetch from '@/hooks/authenticatedFetch';
+
 interface Conversation {
   _id: string;
   summary: string;
@@ -21,6 +21,8 @@ interface ConversationContextProps {
   setConversationList: React.Dispatch<
     React.SetStateAction<ConversationsByDate>
   >;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ConversationContext = createContext<ConversationContextProps | undefined>(
@@ -52,12 +54,15 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       before_that: [],
     }
   );
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
     <ConversationContext.Provider
       value={{
         conversationList,
         setConversationList,
+        isSidebarOpen,
+        setIsSidebarOpen,
       }}
     >
       {children}
