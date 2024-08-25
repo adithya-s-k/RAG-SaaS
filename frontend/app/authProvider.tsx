@@ -2,102 +2,128 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import axios from 'axios';
+import Cookies from 'js-cookie';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isAdmin: boolean;
   email: string | null;
   firstName: string | null;
   lastName: string | null;
-  login: (email: string, firstName: string, lastName: string) => void;
+  accessToken: string | null;
+  login: (
+    accessToken: string,
+    refreshToken: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    isAdmin: boolean
+  ) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const publicRoutes = [
-  '/',
-  '/resetPassword',
-  '/about-us',
-  '/plans',
-  '/signup',
-  '/signin',
-  '/features',
-  '/verifiedEmail',
-];
+const publicRoutes = ['/', '/about-us', '/plans', '/features'];
+const authRoutes = ['/signin', '/signup', '/resetPassword', '/verifiedEmail'];
+const userProtectedRoutes = ['/chat', '/profile'];
+const adminProtectedRoutes = ['/admin', '/admin/users', '/admin/settings'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [email, setEmail] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [lastName, setLastName] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/check-auth`,
-  //         { withCredentials: true }
-  //       );
-  //       if (response.data.authenticated) {
-  //         setIsAuthenticated(true);
-  //         const userResponse = await axios.get(
-  //           `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/user`,
-  //           { withCredentials: true }
-  //         );
-  //         setEmail(userResponse.data.email);
-  //         setFirstName(userResponse.data.first_name);
-  //         setLastName(userResponse.data.last_name);
-  //       } else {
-  //         setIsAuthenticated(false);
-  //         if (!publicRoutes.includes(pathname)) {
-  //           router.push('/signin');
-  //         }
-  //       }
-  //     } catch (error) {
-  //       setIsAuthenticated(false);
-  //       if (!publicRoutes.includes(pathname)) {
-  //         router.push('/signin');
-  //       }
-  //     }
-  //   };
+  useEffect(() => {
+    const accessTokenFromCookie = Cookies.get('accessToken');
+    const emailFromCookie = Cookies.get('email');
+    const firstNameFromCookie = Cookies.get('firstName');
+    const lastNameFromCookie = Cookies.get('lastName');
+    const isAdminFromCookie = Cookies.get('isAdmin');
 
-  //   checkAuth();
-  // }, [router, pathname]);
+    if (accessTokenFromCookie && emailFromCookie) {
+      setIsAuthenticated(true);
+      setAccessToken(accessTokenFromCookie);
+      setEmail(emailFromCookie);
+      setFirstName(firstNameFromCookie || null);
+      setLastName(lastNameFromCookie || null);
+      setIsAdmin(isAdminFromCookie === 'true');
 
-  const login = (email: string, firstName: string, lastName: string) => {
+      if (authRoutes.includes(pathname)) {
+        router.push('/chat');
+      } else if (
+        adminProtectedRoutes.includes(pathname) &&
+        !isAdminFromCookie
+      ) {
+        router.push('/chat');
+      }
+    } else {
+      setIsAuthenticated(false);
+      if (
+        userProtectedRoutes.includes(pathname) ||
+        adminProtectedRoutes.includes(pathname)
+      ) {
+        router.push('/signin');
+      }
+    }
+  }, [router, pathname]);
+
+  const login = (
+    accessToken: string,
+    refreshToken: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    isAdmin: boolean
+  ) => {
+    Cookies.set('accessToken', accessToken, { expires: 7 });
+    Cookies.set('refreshToken', refreshToken, { expires: 30 });
+    Cookies.set('email', email, { expires: 7 });
+    Cookies.set('firstName', firstName, { expires: 7 });
+    Cookies.set('lastName', lastName, { expires: 7 });
+    Cookies.set('isAdmin', isAdmin.toString(), { expires: 7 });
+
     setIsAuthenticated(true);
+    setAccessToken(accessToken);
     setEmail(email);
     setFirstName(firstName);
     setLastName(lastName);
+    setIsAdmin(isAdmin);
+
+    router.push('/chat');
   };
 
-  const logout = async () => {
-    try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-      setIsAuthenticated(false);
-      setEmail(null);
-      setFirstName(null);
-      setLastName(null);
-      router.push('/signin');
-    } catch (error) {
-      console.error('Logout failed', error);
-    }
+  const logout = () => {
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    Cookies.remove('email');
+    Cookies.remove('firstName');
+    Cookies.remove('lastName');
+    Cookies.remove('isAdmin');
+
+    setIsAuthenticated(false);
+    setIsAdmin(false);
+    setAccessToken(null);
+    setEmail(null);
+    setFirstName(null);
+    setLastName(null);
+    router.push('/signin');
   };
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        isAdmin,
         email,
         firstName,
         lastName,
+        accessToken,
         login,
         logout,
       }}
@@ -115,16 +141,34 @@ export const useAuth = () => {
   return context;
 };
 
-export const useRequireAuth = () => {
-  const { isAuthenticated } = useAuth();
+export const useRequireAuth = (adminRequired: boolean = false) => {
+  const { isAuthenticated, isAdmin, accessToken } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isAuthenticated && !publicRoutes.includes(pathname)) {
-      router.push('/signin');
+    if (!isAuthenticated) {
+      if (
+        userProtectedRoutes.includes(pathname) ||
+        adminProtectedRoutes.includes(pathname)
+      ) {
+        router.push('/signin');
+      }
+    } else {
+      if (authRoutes.includes(pathname)) {
+        router.push('/chat');
+      } else if (
+        adminRequired &&
+        !isAdmin &&
+        adminProtectedRoutes.includes(pathname)
+      ) {
+        router.push('/chat');
+      }
     }
-  }, [isAuthenticated, router, pathname]);
+  }, [isAuthenticated, isAdmin, router, pathname, adminRequired]);
 
-  return isAuthenticated;
+  return {
+    isAuthorized: isAuthenticated && (!adminRequired || isAdmin),
+    accessToken,
+  };
 };

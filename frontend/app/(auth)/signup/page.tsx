@@ -54,17 +54,7 @@ export default function SignUp() {
         }
       );
 
-      if (response.data.message === 'User created successfully') {
-        // const loginResponse = await axios.post(
-        //   `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/signin`,
-        //   {
-        //     username: formData.email,
-        //     password: formData.password,
-        //   },
-        //   { withCredentials: true }
-        // );
-
-        // login(formData.email, formData.firstName, formData.lastName);
+      if (response.data.status === 'success') {
         toast('User Sign Up successful');
         router.push('/signin');
       }
@@ -153,19 +143,17 @@ export default function SignUp() {
                 onChange={handleChange}
               />
             </div>
-            {error && (
-              <Alert variant="default">
+            {/* {error && (
+              <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
-            )}
+            )} */}
             <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Creating Account...' : 'Create Account'}
               {isLoading ? (
-                <>
-                  Creating Account...
-                  <Loader2 className="h-4 w-4 animate-spin ml-4" />
-                </>
+                <Loader2 className="h-4 w-4 animate-spin ml-4" />
               ) : (
-                'Create Account'
+                <></>
               )}
             </Button>
           </form>

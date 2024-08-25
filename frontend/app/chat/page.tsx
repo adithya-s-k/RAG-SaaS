@@ -13,16 +13,16 @@ import useAuthenticatedFetch from '@/hooks/authenticatedFetch';
 import { useAuth } from '@/app/authProvider';
 import Loading from '@/components/loading';
 
-export default function Chat({
-  params,
-}: {
-  params: { conversationId: string };
-}) {
+// export default function Chat({
+//   params,
+// }: {
+//   params: { conversationId: string };
+// }) {
+export default function Chat() {
   const authenticatedFetch = useAuthenticatedFetch();
   const { isAuthenticated, accessToken } = useAuth();
   const { backend } = useClientConfig();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { conversationList, setConversationList } = useConversationContext();
 

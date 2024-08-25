@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
+import { useAuth } from '@/app/authProvider';
 
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import {
   X,
   AlignLeft,
   MessageSquare,
+  LogOut,
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 
@@ -24,6 +26,7 @@ export function Header() {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -31,6 +34,11 @@ export function Header() {
 
   const toggleChatHistory = () => {
     setIsChatHistoryOpen(!isChatHistoryOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
   };
 
   return (
@@ -60,9 +68,15 @@ export function Header() {
           <Button variant="ghost" asChild>
             <Link href="/features">Features</Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link href="/signin">Sign In</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
+            </Button>
+          ) : (
+            <Button variant="outline" asChild>
+              <Link href="/signin">Sign In</Link>
+            </Button>
+          )}
           <a
             href="https://github.com/adithya-s-k/RAG-SaaS"
             target="_blank"
@@ -124,13 +138,24 @@ export function Header() {
                 >
                   <Link href="/features">Features</Link>
                 </Button>
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="w-full justify-start"
-                >
-                  <Link href="/signin">Sign In</Link>
-                </Button>
+                {isAuthenticated ? (
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="w-full justify-start"
+                  >
+                    <LogOut className="mr-2 h-5 w-5" />
+                    Logout
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="w-full justify-start"
+                  >
+                    <Link href="/signin">Sign In</Link>
+                  </Button>
+                )}
                 <Separator />
                 <Link
                   href="https://github.com/adithya-s-k/RAG-SaaS"

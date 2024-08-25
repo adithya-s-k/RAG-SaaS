@@ -46,6 +46,7 @@
     "cmdk": "^1.0.0",
     "framer-motion": "^11.3.30",
     "input-otp": "^1.2.4",
+    "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "llamaindex": "^0.5.19",
     "lucide-react": "^0.435.0",
@@ -70,6 +71,7 @@
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
