@@ -1,64 +1,44 @@
 import os
-from typing import Any
+from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
-from pymongo import MongoClient
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
+from app.models.user_model import User
+from app.core.security import get_password
 
 load_dotenv()
 
-class MongoDBConnection:
-    def __init__(self, collection_name: str):
-        self.uri = os.getenv("MONGODB_URI")
-        if not self.uri:
-            raise ValueError("MONGODB_URI not found in .env file")
-        
-        self.database_name = os.getenv("MONGODB_DATABASE", "RAGSAAS")
-        self.collection_name = collection_name
-        self.sync_client = None
-        self.async_client = None
+MONGODB_URI = os.getenv("MONGODB_URI")
+MONGODB_NAME = os.getenv("MONGODB_NAME", "RAGSAAS")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")  # Add this line
 
-    def get_sync_collection(self) -> Any:
-        if not self.sync_client:
-            self.sync_client = MongoClient(self.uri)
-        db = self.sync_client[self.database_name]
-        return db[self.collection_name]
 
-    def get_async_collection(self) -> AsyncIOMotorCollection:
-        if not self.async_client:
-            self.async_client = AsyncIOMotorClient(self.uri)
-        db = self.async_client[self.database_name]
-        return db[self.collection_name]
+class MongoDB:
+    client: AsyncIOMotorClient = None
+    db = None
 
-    def sync_operation(self, operation: str, *args, **kwargs) -> Any:
-        collection = self.get_sync_collection()
-        return getattr(collection, operation)(*args, **kwargs)
+    async def connect_to_database(self):
+        self.client = AsyncIOMotorClient(MONGODB_URI)
+        self.db = self.client[MONGODB_NAME]
+        print("Connected to MongoDB")
 
-    async def async_operation(self, operation: str, *args, **kwargs) -> Any:
-        collection = self.get_async_collection()
-        return await getattr(collection, operation)(*args, **kwargs)
+    async def close_database_connection(self):
+        if self.client:
+            self.client.close()
+            print("Closed MongoDB connection")
 
-mongodb = MongoDBConnection()
+    async def create_admin_user(self):
+        users_collection = self.db.users
+        existing_user = await users_collection.find_one({"email": ADMIN_EMAIL})
+        if not existing_user:
+            admin_user = User(
+                username=ADMIN_USERNAME,
+                email=ADMIN_EMAIL,
+                hashed_password=get_password(ADMIN_PASSWORD),
+                role="admin",
+            )
+            await users_collection.insert_one(admin_user.to_mongo())
+            print(f"Admin user created with email: {ADMIN_EMAIL}")
 
-def get_user_collection():
-    return mongodb.get_async_collection("users")
 
-def get_conversation_collection():
-    return mongodb.get_async_collection("conversations")
-
-# Usage example
-# if __name__ == "__main__":
-#     # Initialize the connection
-#     mongo = MongoDBConnection("your_collection")
-
-#     # Synchronous operation example
-#     sync_result = mongo.sync_operation("find_one", {"key": "value"})
-#     print("Sync result:", sync_result)
-
-#     # Asynchronous operation example
-#     import asyncio
-
-#     async def async_example():
-#         async_result = await mongo.async_operation("find_one", {"key": "value"})
-#         print("Async result:", async_result)
-
-#     asyncio.run(async_example())
+mongodb = MongoDB()

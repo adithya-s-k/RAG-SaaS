@@ -7,7 +7,7 @@ from llama_index.core.chat_engine.types import StreamingAgentChatResponse
 
 from app.api.chat.events import EventCallbackHandler
 from app.api.chat.models import ChatData, Message, SourceNodes
-from app.api.services.suggestion import NextQuestionSuggestion
+from app.api.chat.services.suggestion import NextQuestionSuggestion
 
 
 class VercelStreamResponse(StreamingResponse):

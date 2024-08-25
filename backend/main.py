@@ -9,6 +9,7 @@ import logging
 import os
 
 import uvicorn
+
 from app.api.chat import chat_router
 from app.api.chat import config_router
 from app.api.chat import file_upload_router
@@ -17,12 +18,27 @@ from app.api.conversation import conversation_router
 from app.api.admin import admin_router
 from app.observability import init_observability
 from app.settings import init_settings
+from app.db import mongodb
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-app = FastAPI()
+from contextlib import asynccontextmanager
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Connect to the database
+    await mongodb.connect_to_database()
+    await mongodb.create_admin_user()
+    yield
+    # Shutdown: Close the database connection
+    await mongodb.close_database_connection()
+
+
+app = FastAPI(lifespan=lifespan)
 
 init_settings()
 init_observability()
@@ -30,20 +46,21 @@ init_observability()
 environment = os.getenv("ENVIRONMENT", "dev")  # Default to 'development' if not set
 logger = logging.getLogger("uvicorn")
 
-if environment == "dev":
-    logger.warning("Running in development mode - allowing CORS for all origins")
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+# if environment == "dev":
+#     logger.warning("Running in development mode - allowing CORS for all origins")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    # Redirect to documentation page when accessing base URL
-    @app.get("/")
-    async def redirect_to_docs():
-        return RedirectResponse(url="/docs")
+
+# Redirect to documentation page when accessing base URL
+@app.get("/")
+async def redirect_to_docs():
+    return RedirectResponse(url="/docs")
 
 
 def mount_static_files(directory, path):
@@ -61,12 +78,14 @@ mount_static_files(DATA_DIR, "/api/files/data")
 # Mount the output files from tools
 mount_static_files("output", "/api/files/output")
 
-app.include_router(chat_router, prefix="/api/chat")
-app.include_router(config_router, prefix="/api/chat/config")
-app.include_router(file_upload_router, prefix="/api/chat/upload")
-app.include_router(auth_router, prefix="/api/auth")
-app.include_router(conversation_router, prefix="/api/conversation")
-app.include_router(admin_router, prefix="/api/admin")
+app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
+app.include_router(config_router, prefix="/api/chat/config", tags=["Chat"])
+app.include_router(file_upload_router, prefix="/api/chat/upload", tags=["Chat"])
+app.include_router(
+    conversation_router, prefix="/api/conversation", tags=["Conversation"]
+)
+app.include_router(admin_router, prefix="/api/admin", tags=["Admin"])
 
 if __name__ == "__main__":
     app_host = os.getenv("APP_HOST", "0.0.0.0")

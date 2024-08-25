@@ -4,7 +4,7 @@ from typing import List, Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.api.services.file import PrivateFileService
+from app.api.chat.services.file import PrivateFileService
 
 file_upload_router = r = APIRouter()
 
