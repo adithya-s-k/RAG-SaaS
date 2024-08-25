@@ -4,13 +4,11 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
-import { useState } from 'react';
-import { useChat } from 'ai/react';
-import { ChatInput } from '@/components/ui/chat';
+import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useClientConfig } from '@/components/ui/chat/hooks/use-config';
+import Loading from '@/components/loading';
 
-export default function Home() {
+function HomeContent() {
   const { theme, setTheme } = useTheme();
   const [inputValue, setInputValue] = useState('');
   const router = useRouter();
@@ -31,7 +29,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="w-screen h-full flex flex-col justify-center items-center">
+      <div className="w-full h-full flex flex-col justify-center items-center">
         <Image
           src={
             theme === 'dark'
@@ -54,5 +52,13 @@ export default function Home() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <HomeContent />
+    </Suspense>
   );
 }

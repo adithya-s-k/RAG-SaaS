@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 import { Header } from '@/components/header';
+import Sidebar from '@/components/sidebar';
 
 const roboto = Roboto({
   weight: ['400', '700'],
@@ -46,6 +47,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // <html lang="en" suppressHydrationWarning>
+    //   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    //     <Analytics />
+    //     <AuthProvider>
+    //       <ConversationProvider>
+    //         <body className={`${roboto.className} flex flex-col h-screen`}>
+    //           <Toaster position="top-right" />
+    //           <Header />
+    //           <div className="flex h-full overflow-hidden w-screen">
+    //             <Sidebar />
+    //             <main className="w-full h-full overflow-x-hidden">
+    //               {children}
+    //             </main>
+    //           </div>
+    //         </body>
+    //       </ConversationProvider>
+    //     </AuthProvider>
+    //   </ThemeProvider>
+    // </html>
     <html lang="en" suppressHydrationWarning>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <Analytics />
@@ -54,7 +74,12 @@ export default function RootLayout({
             <body className={`${roboto.className} flex flex-col h-screen`}>
               <Toaster position="top-right" />
               <Header />
-              <main className="h-full overflow-x-hidden">{children}</main>
+              <div className="flex flex-1 overflow-y-hidden">
+                <Sidebar />
+                <main className="w-full h-full overflow-y-hidden">
+                  {children}
+                </main>
+              </div>
             </body>
           </ConversationProvider>
         </AuthProvider>

@@ -1,5 +1,204 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-// import { ScrollShadow } from "@nextui-org/react";
+// /* eslint-disable react-hooks/exhaustive-deps */
+// // import { ScrollShadow } from "@nextui-org/react";
+// 'use client';
+
+// import { useEffect, useState } from 'react';
+// import { useChat } from 'ai/react';
+// import { ChatInput, ChatMessages } from '@/components/ui/chat';
+// import { useClientConfig } from '@/components/ui/chat/hooks/use-config';
+// import { useRouter, useSearchParams } from 'next/navigation';
+// import { Suspense } from 'react';
+// import { useConversationContext } from '@/app/ConversationContext';
+// import { useAuth } from '@/app/authProvider';
+// import Loading from '@/components/loading';
+// import { toast } from 'sonner';
+// import axios from 'axios';
+
+// // export default function Chat({
+// //   params,
+// // }: {
+// //   params: { conversationId: string };
+// // }) {
+// export default function Chat() {
+//   // const authenticatedFetch = useAuthenticatedFetch();
+//   const { isAuthenticated, accessToken } = useAuth();
+//   const { backend } = useClientConfig();
+//   const router = useRouter();
+//   const searchParams = useSearchParams();
+//   const [conversationId, setConversationId] = useState<string | null>(null);
+//   const { conversationList, setConversationList } = useConversationContext();
+
+//   const axiosInstance = axios.create({
+//     baseURL: backend,
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${accessToken}`,
+//     },
+//   });
+
+//   const fetchMessages = async () => {
+//     try {
+//       const response = await axiosInstance.get(
+//         `/conversation/${conversationId}`
+//       );
+//       setMessages(response.data.messages || []);
+//     } catch (error: any) {
+//       if (error.response && error.response.status === 401) {
+//         return;
+//       }
+//       toast(`Failed to fetch conversation: ${error.message}`);
+//     }
+//   };
+
+//   const fetchConversations = async () => {
+//     try {
+//       const response = await axiosInstance.get('/conversations/list');
+//       setConversationList(response.data.conversations);
+//     } catch (error: any) {
+//       console.error('Error fetching conversations:', error.message);
+//     }
+//   };
+
+//   const updateMessageContent = (
+//     id: string,
+//     oldContent: string,
+//     newContent: string
+//   ) => {
+//     const messageIndex = messages.findIndex(
+//       (m) => m.role === 'user' && m.content === oldContent
+//     );
+//     if (messageIndex !== -1) {
+//       const updatedMessages = [...messages.slice(0, messageIndex)];
+//       setMessages(updatedMessages);
+
+//       append!({
+//         role: 'user',
+//         content: newContent,
+//       });
+//     }
+//   };
+
+//   const handleNewChat = async () => {
+//     try {
+//       const response = await axiosInstance.get('/conversation');
+//       const newConversationId = response.data.conversation_id;
+//       router.push(`/chat?conversation_id=${newConversationId}`);
+//     } catch (error: any) {
+//       console.error('Error creating new conversation:', error.message);
+//     }
+//   };
+
+//   const {
+//     messages,
+//     input,
+//     isLoading,
+//     handleSubmit,
+//     handleInputChange,
+//     reload,
+//     stop,
+//     append,
+//     setInput,
+//     setMessages,
+//   } = useChat({
+//     api: `${backend}/api/chat?conversation_id=${conversationId}`,
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${accessToken}`,
+//     },
+
+//     onError: (error: unknown) => {
+//       if (!(error instanceof Error)) throw error;
+//       let errorMessage = 'An unexpected error occurred.';
+
+//       try {
+//         const errorResponse = JSON.parse(error.message);
+
+//         if (errorResponse.detail === 'Not authenticated') {
+//           alert('Session has expired. Please login again.');
+//           router.push('/signin');
+//           return;
+//         }
+
+//         if (errorResponse.detail) {
+//           errorMessage = `Error: ${errorResponse.detail}`;
+//         } else if (errorResponse.errors) {
+//           errorMessage = `Validation Errors: ${errorResponse.errors.join(
+//             ', '
+//           )}`;
+//         } else if (errorResponse.message) {
+//           errorMessage = `Message: ${errorResponse.message}`;
+//         } else if (errorResponse.error) {
+//           errorMessage = `Error: ${errorResponse.error}`;
+//         } else {
+//           errorMessage = `Unknown error format: ${error.message}`;
+//         }
+//       } catch (parseError) {
+//         errorMessage = `Error parsing response: ${error.message}`;
+//       }
+
+//       toast(errorMessage);
+//     },
+//   });
+
+//   useEffect(() => {
+//     fetchConversations();
+//   }, [isLoading]);
+
+//   useEffect(() => {
+//     if (conversationId) {
+//       fetchMessages();
+//     }
+//   }, [conversationId]);
+
+//   useEffect(() => {
+//     const urlConversationId = searchParams.get('conversation_id');
+//     const query = searchParams.get('query');
+
+//     setConversationId(urlConversationId);
+//     if (query) {
+//       setInput(query);
+//     }
+//   }, [searchParams]);
+
+//   useEffect(() => {
+//     const urlConversationId = searchParams.get('conversation_id');
+//     if (isAuthenticated && !urlConversationId) {
+//       const timer = setTimeout(() => {
+//         handleNewChat();
+//       }, 1000); // Wait for 1 second before creating a new conversation
+
+//       return () => clearTimeout(timer);
+//     }
+//   }, [isAuthenticated, searchParams]);
+//   return (
+//     <>
+//       <Suspense fallback={<Loading />}>
+//         <div className="w-screen h-full flex justify-center items-center bg-primary-foreground">
+//           <div className="space-y-2 w-full md:w-[75%] lg:w-[60%] h-full flex flex-col p-4">
+//             <ChatMessages
+//               messages={messages}
+//               isLoading={isLoading}
+//               reload={reload}
+//               stop={stop}
+//               append={append}
+//               updateMessageContent={updateMessageContent}
+//             />
+//             <ChatInput
+//               input={input}
+//               handleSubmit={handleSubmit}
+//               handleInputChange={handleInputChange}
+//               isLoading={isLoading}
+//               messages={messages}
+//               append={append}
+//               setInput={setInput}
+//             />
+//           </div>
+//         </div>
+//       </Suspense>
+//     </>
+//   );
+// }
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -9,22 +208,55 @@ import { useClientConfig } from '@/components/ui/chat/hooks/use-config';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useConversationContext } from '@/app/ConversationContext';
-import useAuthenticatedFetch from '@/hooks/authenticatedFetch';
 import { useAuth } from '@/app/authProvider';
 import Loading from '@/components/loading';
+import { toast } from 'sonner';
+import axios from 'axios';
 
-// export default function Chat({
-//   params,
-// }: {
-//   params: { conversationId: string };
-// }) {
-export default function Chat() {
-  const authenticatedFetch = useAuthenticatedFetch();
+function ChatContent() {
   const { isAuthenticated, accessToken } = useAuth();
   const { backend } = useClientConfig();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { conversationList, setConversationList } = useConversationContext();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const axiosInstance = axios.create({
+    baseURL: backend,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const fetchMessages = async () => {
+    if (!conversationId) return;
+    try {
+      const response = await axiosInstance.get(
+        `/api/conversation/${conversationId}`
+      );
+      setMessages(response.data.messages || []);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        return;
+      }
+      toast(`Failed to fetch conversation: ${error.message}`);
+    }
+  };
+
+  const fetchConversations = async () => {
+    try {
+      const response = await axiosInstance.get('/api/conversation/list');
+      setConversationList(response.data.conversations);
+    } catch (error: any) {
+      console.error('Error fetching conversations:', error.message);
+    }
+  };
 
   const updateMessageContent = (
     id: string,
@@ -47,21 +279,11 @@ export default function Chat() {
 
   const handleNewChat = async () => {
     try {
-      const response = await authenticatedFetch('/conversation', {
-        method: 'GET',
-      });
-      if (!response) return;
-      if (!response.ok) {
-        throw new Error(
-          `Failed to create new conversation: ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      const newConversationId = data.conversation_id;
+      const response = await axiosInstance.get('/api/conversation');
+      const newConversationId = response.data.conversation_id;
       router.push(`/chat?conversation_id=${newConversationId}`);
-    } catch (error) {
-      console.error('Error creating new conversation:', error);
+    } catch (error: any) {
+      console.error('Error creating new conversation:', error.message);
     }
   };
 
@@ -77,13 +299,12 @@ export default function Chat() {
     setInput,
     setMessages,
   } = useChat({
-    // api: `${backend}/api/chat?conversation_id=${conversationId}`,
-    api: `${backend}/api/chat`,
-    // headers: {
-    //   'Content-Type': 'application/json',
-    //   Authorization: `Bearer ${accessToken}`,
-    // },
-
+    api: `${backend}/api/chat?conversation_id=${conversationId}`,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: { conversation_id: conversationId },
     onError: (error: unknown) => {
       if (!(error instanceof Error)) throw error;
       let errorMessage = 'An unexpected error occurred.';
@@ -114,35 +335,84 @@ export default function Chat() {
         errorMessage = `Error parsing response: ${error.message}`;
       }
 
-      alert(errorMessage);
+      toast(errorMessage);
     },
   });
 
+  useEffect(() => {
+    if (isClient) {
+      fetchConversations();
+    }
+  }, [isClient, isLoading]);
+
+  useEffect(() => {
+    if (isClient && conversationId) {
+      fetchMessages();
+    }
+  }, [isClient, conversationId]);
+
+  useEffect(() => {
+    if (isClient) {
+      const urlConversationId = searchParams.get('conversation_id');
+      const query = searchParams.get('query');
+
+      setConversationId(urlConversationId);
+      if (query) {
+        setInput(query);
+      }
+    }
+  }, [isClient, searchParams]);
+
+  useEffect(() => {
+    if (isClient && isAuthenticated) {
+      const urlConversationId = searchParams.get('conversation_id');
+      if (!urlConversationId) {
+        const timer = setTimeout(() => {
+          handleNewChat();
+        }, 1000); // Wait for 1 second before creating a new conversation
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isClient, isAuthenticated, searchParams]);
+
+  if (!isClient) {
+    <Loading />;
+  }
+
   return (
-    <>
-      <Suspense fallback={<Loading />}>
-        <div className="w-screen h-full flex justify-center items-center bg-primary-foreground">
-          <div className="space-y-2 w-full md:w-[75%] lg:w-[60%] h-full flex flex-col p-4">
-            <ChatMessages
-              messages={messages}
-              isLoading={isLoading}
-              reload={reload}
-              stop={stop}
-              append={append}
-              updateMessageContent={updateMessageContent}
-            />
-            <ChatInput
-              input={input}
-              handleSubmit={handleSubmit}
-              handleInputChange={handleInputChange}
-              isLoading={isLoading}
-              messages={messages}
-              append={append}
-              setInput={setInput}
-            />
-          </div>
-        </div>
-      </Suspense>
-    </>
+    <div className="w-full h-full flex justify-center items-center bg-primary-foreground">
+      <div className="space-y-2 w-full  md:w-[90%] lg:w-[70%] h-full flex flex-col p-4">
+        <Suspense fallback={<Loading />}>
+          <ChatMessages
+            messages={messages}
+            isLoading={isLoading}
+            reload={reload}
+            stop={stop}
+            append={append}
+            updateMessageContent={updateMessageContent}
+          />
+        </Suspense>
+        <Suspense fallback={<Loading />}>
+          <ChatInput
+            input={input}
+            handleSubmit={handleSubmit}
+            handleInputChange={handleInputChange}
+            isLoading={isLoading}
+            messages={messages}
+            append={append}
+            setInput={setInput}
+          />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
+
+export default function Chat() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ChatContent />
+    </Suspense>
   );
 }
