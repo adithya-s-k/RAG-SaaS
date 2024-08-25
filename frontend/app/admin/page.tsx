@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useAuth, useRequireAuth } from '@/app/authProvider';
 import axios from 'axios';
+import Loading from '@/components/loading';
 
 interface UserOut {
   email: string;
@@ -11,7 +12,7 @@ interface UserOut {
   role: string | null;
 }
 
-export default function AdminPage() {
+function AdminPageContent() {
   const [user, setUser] = useState<UserOut | null>(null);
   const { accessToken } = useAuth();
   const { isAuthorized, isLoading } = useRequireAuth(true); // Require admin access
@@ -78,5 +79,18 @@ export default function AdminPage() {
         </div>
       </div>
     </div>
+  );
+}
+export default function AdminPage() {
+  const { isLoading } = useRequireAuth(true);
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <AdminPageContent />
+    </Suspense>
   );
 }

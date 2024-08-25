@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -11,10 +11,12 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import BannerCard from '@/components/banner-card';
+// import BannerCard from '@/components/banner-card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import Loading from '@/components/loading';
+const BannerCard = lazy(() => import('@/components/banner-card'));
 
-export default function SignUp() {
+function SignUpContent() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -169,5 +171,13 @@ export default function SignUp() {
         <BannerCard />
       </div>
     </div>
+  );
+}
+
+export default function SignUp() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SignUpContent />
+    </Suspense>
   );
 }
