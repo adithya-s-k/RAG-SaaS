@@ -35,10 +35,12 @@ class VercelStreamResponse(StreamingResponse):
         event_handler: EventCallbackHandler,
         response: StreamingAgentChatResponse,
         chat_data: ChatData,
+        content=None,
     ):
-        content = VercelStreamResponse.content_generator(
-            request, event_handler, response, chat_data
-        )
+        if content is None:
+            content = VercelStreamResponse.content_generator(
+                request, event_handler, response, chat_data
+            )
         super().__init__(content=content)
 
     @classmethod

@@ -13,6 +13,10 @@ load_dotenv()
 
 
 class UserService:
+    @property
+    def users_collection(self):
+        return mongodb.db.users
+
     async def create_user(self, user: UserAuth) -> User:
         user_obj = User(
             email=user.email,
@@ -24,7 +28,7 @@ class UserService:
         user_dict = user_obj.to_mongo()
 
         try:
-            result = await mongodb.db.users.insert_one(user_dict)
+            result = await self.users_collection.insert_one(user_dict)
             user_dict["_id"] = result.inserted_id
             return User.from_mongo(user_dict)
         except DuplicateKeyError:
@@ -39,16 +43,18 @@ class UserService:
         return user
 
     async def get_user_by_email(self, email: str) -> Optional[User]:
-        user_dict = await mongodb.db.users.find_one({"email": email})
+        user_dict = await self.users_collection.find_one({"email": email})
         return User.from_mongo(user_dict) if user_dict else None
 
     async def get_user_by_id(self, id: UUID) -> Optional[User]:
-        user_dict = await mongodb.db.users.find_one({"user_id": Binary.from_uuid(id)})
+        user_dict = await self.users_collection.find_one(
+            {"user_id": Binary.from_uuid(id)}
+        )
         return User.from_mongo(user_dict) if user_dict else None
 
     async def update_user(self, id: UUID, data: UserUpdate) -> User:
         update_data = data.model_dump(exclude_unset=True)
-        result = await mongodb.db.users.update_one(
+        result = await self.users_collection.update_one(
             {"user_id": Binary.from_uuid(id)}, {"$set": update_data}
         )
 
