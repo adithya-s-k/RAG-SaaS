@@ -234,14 +234,7 @@ export default function SignIn() {
         role,
       } = userResponse.data;
 
-      login(
-        access_token,
-        refresh_token,
-        userEmail,
-        first_name,
-        last_name,
-        role === 'admin'
-      );
+      login(access_token, refresh_token, userEmail, first_name, last_name);
       toast.success('Sign In successful');
       router.push('/chat');
     } catch (error) {
@@ -291,9 +284,6 @@ export default function SignIn() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" className="text-sm underline">
-                  Forgot your password?
-                </Link>
               </div>
               <Input
                 id="password"

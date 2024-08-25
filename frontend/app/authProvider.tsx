@@ -3,6 +3,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -16,17 +18,17 @@ interface AuthContextType {
     refreshToken: string,
     email: string,
     firstName: string,
-    lastName: string,
-    isAdmin: boolean
+    lastName: string
   ) => void;
   logout: () => void;
+  verifyAdminStatus: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const publicRoutes = ['/', '/about-us', '/plans', '/features'];
 const authRoutes = ['/signin', '/signup', '/resetPassword', '/verifiedEmail'];
-const userProtectedRoutes = ['/chat', '/profile'];
+const userProtectedRoutes = ['/chat', '/profile', '/admin'];
 const adminProtectedRoutes = ['/admin', '/admin/users', '/admin/settings'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -39,62 +41,139 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    const accessTokenFromCookie = Cookies.get('accessToken');
-    const emailFromCookie = Cookies.get('email');
-    const firstNameFromCookie = Cookies.get('firstName');
-    const lastNameFromCookie = Cookies.get('lastName');
-    const isAdminFromCookie = Cookies.get('isAdmin');
-
-    if (accessTokenFromCookie && emailFromCookie) {
-      setIsAuthenticated(true);
-      setAccessToken(accessTokenFromCookie);
-      setEmail(emailFromCookie);
-      setFirstName(firstNameFromCookie || null);
-      setLastName(lastNameFromCookie || null);
-      setIsAdmin(isAdminFromCookie === 'true');
-
-      if (authRoutes.includes(pathname)) {
-        router.push('/chat');
-      } else if (
-        adminProtectedRoutes.includes(pathname) &&
-        !isAdminFromCookie
-      ) {
-        router.push('/chat');
+  const refreshToken = async () => {
+    try {
+      const refreshTokenFromCookie = Cookies.get('refreshToken');
+      if (!refreshTokenFromCookie) {
+        throw new Error('No refresh token found');
       }
-    } else {
-      setIsAuthenticated(false);
-      if (
-        userProtectedRoutes.includes(pathname) ||
-        adminProtectedRoutes.includes(pathname)
-      ) {
-        router.push('/signin');
-      }
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/refresh`,
+        { refresh_token: refreshTokenFromCookie },
+        { withCredentials: true }
+      );
+
+      const { access_token, refresh_token } = response.data;
+      Cookies.set('accessToken', access_token, { expires: 7 });
+      Cookies.set('refreshToken', refresh_token, { expires: 30 });
+      setAccessToken(access_token);
+      return access_token;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      logout();
+      return null;
     }
-  }, [router, pathname]);
+  };
+
+  const isTokenExpired = (token: string) => {
+    try {
+      const decodedToken: any = jwtDecode(token);
+      return decodedToken.exp * 1000 < Date.now();
+    } catch (error) {
+      return true;
+    }
+  };
+
+  const verifyAdminStatus = async (): Promise<boolean> => {
+    try {
+      console.log('Access Token:', accessToken); // Log the token
+      if (!accessToken) {
+        console.error('No access token available');
+        return false;
+      }
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/verify-admin`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      console.log('Verify admin response:', response.data);
+      if (response.data.isAdmin == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error('Failed to verify admin status:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error response:', error.response?.data);
+      }
+      return false;
+    }
+  };
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      let currentAccessToken = Cookies.get('accessToken');
+      const emailFromCookie = Cookies.get('email');
+      const firstNameFromCookie = Cookies.get('firstName');
+      const lastNameFromCookie = Cookies.get('lastName');
+
+      if (currentAccessToken && emailFromCookie) {
+        if (isTokenExpired(currentAccessToken)) {
+          currentAccessToken = await refreshToken();
+          if (!currentAccessToken) {
+            logout();
+            return;
+          }
+        }
+
+        setIsAuthenticated(true);
+        setAccessToken(currentAccessToken);
+        setEmail(emailFromCookie);
+        setFirstName(firstNameFromCookie || null);
+        setLastName(lastNameFromCookie || null);
+
+        // Verify admin status whenever the access token is set or changed
+        const adminStatus = await verifyAdminStatus();
+        setIsAdmin(adminStatus);
+
+        if (authRoutes.includes(pathname)) {
+          router.push('/chat');
+        } else if (
+          adminProtectedRoutes.includes(pathname) &&
+          !(await verifyAdminStatus())
+        ) {
+          console.log('Chat redirect 2');
+          router.push('/chat');
+        }
+      } else {
+        setIsAuthenticated(false);
+        setIsAdmin(false);
+        if (
+          userProtectedRoutes.includes(pathname) ||
+          adminProtectedRoutes.includes(pathname)
+        ) {
+          router.push('/signin');
+        }
+      }
+    };
+
+    checkAuthStatus();
+  }, [router, pathname, accessToken]);
 
   const login = (
     accessToken: string,
     refreshToken: string,
     email: string,
     firstName: string,
-    lastName: string,
-    isAdmin: boolean
+    lastName: string
   ) => {
     Cookies.set('accessToken', accessToken, { expires: 7 });
     Cookies.set('refreshToken', refreshToken, { expires: 30 });
     Cookies.set('email', email, { expires: 7 });
     Cookies.set('firstName', firstName, { expires: 7 });
     Cookies.set('lastName', lastName, { expires: 7 });
-    Cookies.set('isAdmin', isAdmin.toString(), { expires: 7 });
 
     setIsAuthenticated(true);
     setAccessToken(accessToken);
     setEmail(email);
     setFirstName(firstName);
     setLastName(lastName);
-    setIsAdmin(isAdmin);
-
+    console.log('Chat redirect 3');
     router.push('/chat');
   };
 
@@ -104,7 +183,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     Cookies.remove('email');
     Cookies.remove('firstName');
     Cookies.remove('lastName');
-    Cookies.remove('isAdmin');
 
     setIsAuthenticated(false);
     setIsAdmin(false);
@@ -126,6 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         accessToken,
         login,
         logout,
+        verifyAdminStatus,
       }}
     >
       {children}
@@ -142,33 +221,57 @@ export const useAuth = () => {
 };
 
 export const useRequireAuth = (adminRequired: boolean = false) => {
-  const { isAuthenticated, isAdmin, accessToken } = useAuth();
+  const { isAuthenticated, isAdmin, accessToken, verifyAdminStatus } =
+    useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      if (
-        userProtectedRoutes.includes(pathname) ||
-        adminProtectedRoutes.includes(pathname)
-      ) {
-        router.push('/signin');
+    const checkAuth = async () => {
+      setIsLoading(true);
+      if (!isAuthenticated) {
+        if (
+          userProtectedRoutes.includes(pathname) ||
+          adminProtectedRoutes.includes(pathname)
+        ) {
+          router.push('/signin');
+        }
+        setIsAuthorized(false);
+      } else {
+        if (authRoutes.includes(pathname)) {
+          console.log('Chat redirect 4');
+          router.push('/chat');
+        } else if (adminRequired) {
+          const adminStatus = await verifyAdminStatus();
+          if (adminStatus) {
+            setIsAuthorized(true);
+          } else {
+            setIsAuthorized(false);
+            console.log('Chat redirect 5');
+            router.push('/chat');
+          }
+        } else {
+          setIsAuthorized(true);
+        }
       }
-    } else {
-      if (authRoutes.includes(pathname)) {
-        router.push('/chat');
-      } else if (
-        adminRequired &&
-        !isAdmin &&
-        adminProtectedRoutes.includes(pathname)
-      ) {
-        router.push('/chat');
-      }
-    }
-  }, [isAuthenticated, isAdmin, router, pathname, adminRequired]);
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [
+    isAuthenticated,
+    isAdmin,
+    router,
+    pathname,
+    adminRequired,
+    verifyAdminStatus,
+  ]);
 
   return {
-    isAuthorized: isAuthenticated && (!adminRequired || isAdmin),
+    isAuthorized,
+    isLoading,
     accessToken,
   };
 };

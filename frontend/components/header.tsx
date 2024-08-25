@@ -19,6 +19,7 @@ import {
   AlignLeft,
   MessageSquare,
   LogOut,
+  User,
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 
@@ -26,7 +27,7 @@ export function Header() {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, firstName } = useAuth();
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -68,15 +69,6 @@ export function Header() {
           <Button variant="ghost" asChild>
             <Link href="/features">Features</Link>
           </Button>
-          {isAuthenticated ? (
-            <Button variant="outline" onClick={handleLogout}>
-              Logout
-            </Button>
-          ) : (
-            <Button variant="outline" asChild>
-              <Link href="/signin">Sign In</Link>
-            </Button>
-          )}
           <a
             href="https://github.com/adithya-s-k/RAG-SaaS"
             target="_blank"
@@ -84,14 +76,25 @@ export function Header() {
           >
             <ShinyButton text="Github ⭐" className="" />
           </a>
-          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+          {isAuthenticated ? (
+            <Button variant="outline" onClick={handleLogout}>
+              <User className="mr-2 h-4 w-4" />
+              {firstName} (Logout)
+            </Button>
+          ) : (
+            <Button variant="outline" asChild>
+              <Link href="/signin">Sign In</Link>
+            </Button>
+          )}
+
+          {/* <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === 'dark' ? (
               <Sun className="h-5 w-5" />
             ) : (
               <Moon className="h-5 w-5" />
             )}
             <span className="sr-only">Toggle theme</span>
-          </Button>
+          </Button> */}
         </nav>
         <button
           className="inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary md:hidden"
@@ -144,8 +147,8 @@ export function Header() {
                     onClick={handleLogout}
                     className="w-full justify-start"
                   >
-                    <LogOut className="mr-2 h-5 w-5" />
-                    Logout
+                    <User className="mr-2 h-5 w-5" />
+                    {firstName} (Logout)
                   </Button>
                 ) : (
                   <Button
@@ -169,7 +172,7 @@ export function Header() {
                   <Github className="mr-2 h-5 w-5" />
                   GitHub
                 </Link>
-                <Button
+                {/* <Button
                   variant="ghost"
                   onClick={toggleTheme}
                   className="w-full justify-start"
@@ -185,7 +188,7 @@ export function Header() {
                       Dark Mode
                     </>
                   )}
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
