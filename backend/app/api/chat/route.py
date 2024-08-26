@@ -62,7 +62,10 @@ async def chat(
             if len(data.messages) <= 2:
                 summary = await summary_generator(data.messages)
         else:
-            summary = conversation.get("summary")
+            try:
+                summary = conversation.get("summary")
+            except Exception as e:
+                summary = "New Chat"
         last_message_content = data.get_last_message_content()
         messages = data.get_history_messages()
 
