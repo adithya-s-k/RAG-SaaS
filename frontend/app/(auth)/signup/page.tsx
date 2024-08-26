@@ -145,11 +145,11 @@ function SignUpContent() {
                 onChange={handleChange}
               />
             </div>
-            {/* {error && (
+            {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
-            )} */}
+            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating Account...' : 'Create Account'}
               {isLoading ? (
