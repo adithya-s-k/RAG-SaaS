@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Github,
+  LinkIcon,
   MessageCircle,
   MessageSquare,
   MoreHorizontal,
@@ -19,6 +20,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from './theme-toggle';
@@ -26,6 +36,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Loading from './loading';
+import Link from 'next/link';
 
 interface Conversation {
   _id: string;
@@ -33,6 +44,7 @@ interface Conversation {
   created_at?: string;
   updated_at?: string;
 }
+
 const MAX_SUMMARY_LENGTH = 27;
 
 function HistoryComponent() {
@@ -42,15 +54,12 @@ function HistoryComponent() {
   const searchParams = useSearchParams();
   const { conversationList, setConversationList } = useConversationContext();
   const [isEditing, setIsEditing] = useState<string | null>(null);
-  const [editedSummary, setEditedSummary] = useState('');
-  const [currentConversationId, setCurrentConversationId] = useState<
-    string | null
-  >(null);
 
-  useEffect(() => {
-    const urlConversationId = searchParams.get('conversation_id');
-    setCurrentConversationId(urlConversationId);
-  }, [searchParams]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
+  const [shareableLink, setShareableLink] = useState<string>('');
+  const [editedSummaries, setEditedSummaries] = useState<{
+    [key: string]: string;
+  }>({});
 
   const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
@@ -61,6 +70,7 @@ function HistoryComponent() {
   });
 
   const fetchConversations = async () => {
+    if (!isAuthenticated) return;
     try {
       const response = await axiosInstance.get('/api/conversation/list');
       setConversationList(response.data.conversations);
@@ -70,14 +80,19 @@ function HistoryComponent() {
   };
 
   const handleEditClick = (conversationId: string, currentSummary: string) => {
+    if (!isAuthenticated) return;
     setIsEditing(conversationId);
-    setEditedSummary(currentSummary);
+    setEditedSummaries((prev) => ({
+      ...prev,
+      [conversationId]: currentSummary,
+    }));
   };
 
   const handleEditSubmit = async (conversationId: string) => {
+    if (!isAuthenticated) return;
     try {
       await axiosInstance.patch(`/api/conversation/${conversationId}/summary`, {
-        summary: editedSummary,
+        summary: editedSummaries[conversationId],
       });
       await fetchConversations();
       setIsEditing(null);
@@ -86,53 +101,123 @@ function HistoryComponent() {
     }
   };
 
-  const handleDeleteClick = async (conversationId: string) => {
+  const handleShareClick = async (conversationId: string) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/conversation/${conversationId}/share`
+      );
+
+      if (response.status === 200) {
+        const shareableLink = `${window.location.origin}/share?conversation_id=${conversationId}`;
+        setShareableLink(shareableLink);
+        setIsShareModalOpen(true);
+      }
+    } catch (error: any) {
+      toast(`Failed to share conversation: ${error.message}`);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(shareableLink);
+    toast('Link copied to clipboard!');
+  };
+
+  const handleDeleteClick = async (conversationId: string): Promise<void> => {
+    if (!isAuthenticated) return;
     const confirmed = window.confirm(
       'Are you sure you want to delete this conversation?'
     );
     if (!confirmed) return;
-
     try {
       await axiosInstance.delete(`/api/conversation/${conversationId}`);
-      await fetchConversations();
-      if (conversationId === currentConversationId) {
-        handleNewChat();
+
+      const currentConversationId = searchParams.get('conversation_id');
+
+      if (currentConversationId === conversationId) {
+        router.push('/chat');
       } else {
-        router.refresh();
+        router.push(`/chat?conversation_id=${currentConversationId}`);
       }
-    } catch (error: any) {
-      toast(`Failed to delete conversation: ${error.message}`);
+
+      await fetchConversations();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast(`Failed to delete conversation: ${error.message}`);
+      } else {
+        toast('An unexpected error occurred while deleting the conversation');
+      }
     }
   };
 
-  const handleShareClick = (conversationId: string) => {
-    // Implement share functionality here
-    toast('Share functionality not implemented yet');
-  };
-
   const handleNewChat = async () => {
+    if (!isAuthenticated) return;
     try {
       const response = await axiosInstance.get('/api/conversation');
       const newConversationId = response.data.conversation_id;
+      fetchConversations();
       router.push(`/chat?conversation_id=${newConversationId}`);
     } catch (error: any) {
       toast(`Failed to create new chat: ${error.message}`);
     }
   };
 
-  const handleConversationClick = (conversationId: string) => {
-    router.push(`/chat?conversation_id=${conversationId}`);
-  };
-
   useEffect(() => {
-    fetchConversations();
-  }, []);
+    if (isAuthenticated) {
+      fetchConversations();
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col h-full bg-background text-foreground text-sm">
+        <Button
+          onClick={handleNewChat}
+          className="m-3 py-2 rounded-md font-semibold bg-primary hover:bg-primary/90 text-primary-foreground text-base"
+        >
+          <Plus className="mr-2 h-5 w-5" /> New Chat
+        </Button>
+        <div className="flex-grow flex items-center justify-center">
+          <p className="text-center text-muted-foreground">
+            Sign in to see your chat history
+          </p>
+        </div>
+        <div className="p-3 border-t flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Button variant="secondary" asChild>
+              <Link href="/signin">Sign In</Link>
+            </Button>
+          </div>
+          <div className="flex items-center space-x-3">
+            <ThemeToggle />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-full bg-background text-foreground text-sm">
+    <div className="flex flex-col h-full bg-background text-foreground text-sm ">
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Conversation</DialogTitle>
+            <DialogDescription>
+              Copy the link below to share this conversation:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2">
+            <Input value={shareableLink} readOnly />
+            <Button onClick={copyToClipboard}>
+              <LinkIcon className="mr-2 h-4 w-4" />
+              Copy
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Button
+        variant="ghost"
         onClick={handleNewChat}
-        className="m-3 py-2 rounded-md font-semibold bg-primary hover:bg-primary/90 text-primary-foreground text-base"
+        className="m-3 py-2 rounded-md font-semibold text-base border-2"
       >
         <Plus className="mr-2 h-5 w-5" /> New Chat
       </Button>
@@ -165,15 +250,20 @@ function HistoryComponent() {
                           <MessageSquare className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                           {isEditing === conversation._id ? (
                             <Input
-                              value={editedSummary}
-                              onChange={(e) => setEditedSummary(e.target.value)}
+                              value={editedSummaries[conversation._id]}
+                              onChange={(e) =>
+                                setEditedSummaries((prev) => ({
+                                  ...prev,
+                                  [conversation._id]: e.target.value,
+                                }))
+                              }
                               onBlur={() => handleEditSubmit(conversation._id)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   handleEditSubmit(conversation._id);
                                 }
                               }}
-                              className="h-full text-sm w-full focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                              className="h-full text-md w-full focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                               placeholder="Edited Summary"
                               onClick={(e) => e.stopPropagation()}
                             />
@@ -204,9 +294,7 @@ function HistoryComponent() {
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() =>
-                                toast('Share functionality not implemented yet')
-                              }
+                              onClick={() => handleShareClick(conversation._id)}
                             >
                               Share
                             </DropdownMenuItem>

@@ -4,9 +4,11 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useConversationContext } from '@/app/ConversationContext';
 import History from '@/components/history';
+import { useAuth } from '@/app/authProvider';
 
 const Sidebar: React.FC = () => {
   const { isSidebarOpen, setIsSidebarOpen } = useConversationContext();
+  const { isAuthenticated } = useAuth();
 
   const sidebarVariants = {
     open: {
@@ -53,8 +55,8 @@ const Sidebar: React.FC = () => {
         variants={sidebarVariants}
         initial="closed"
         animate={isSidebarOpen ? 'open' : 'closed'}
-        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-background overflow-hidden z-50 lg:relative lg:top-0 lg:h-full ${
-          isSidebarOpen ? 'shadow-lg w-max-[350px]' : ''
+        className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-background overflow-hidden z-50 lg:relative lg:top-0 lg:h-full border-r ${
+          isSidebarOpen ? ' w-max-[350px]' : ''
         }`}
       >
         <motion.div
