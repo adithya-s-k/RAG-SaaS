@@ -127,6 +127,9 @@ function HistoryComponent() {
     const confirmed = window.confirm(
       'Are you sure you want to delete this conversation?'
     );
+
+    router.push(`/chat?conversation_id=${conversationId}`);
+
     if (!confirmed) return;
     try {
       await axiosInstance.delete(`/api/conversation/${conversationId}`);
@@ -171,8 +174,9 @@ function HistoryComponent() {
     return (
       <div className="flex flex-col h-full bg-background text-foreground text-sm">
         <Button
+          variant="ghost"
           onClick={handleNewChat}
-          className="m-3 py-2 rounded-md font-semibold bg-primary hover:bg-primary/90 text-primary-foreground text-base"
+          className="m-3 py-2 rounded-md font-semibold text-base border-2"
         >
           <Plus className="mr-2 h-5 w-5" /> New Chat
         </Button>

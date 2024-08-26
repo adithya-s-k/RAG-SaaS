@@ -47,25 +47,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // <html lang="en" suppressHydrationWarning>
-    //   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-    //     <Analytics />
-    //     <AuthProvider>
-    //       <ConversationProvider>
-    //         <body className={`${roboto.className} flex flex-col h-screen`}>
-    //           <Toaster position="top-right" />
-    //           <Header />
-    //           <div className="flex h-full overflow-hidden w-screen">
-    //             <Sidebar />
-    //             <main className="w-full h-full overflow-x-hidden">
-    //               {children}
-    //             </main>
-    //           </div>
-    //         </body>
-    //       </ConversationProvider>
-    //     </AuthProvider>
-    //   </ThemeProvider>
-    // </html>
     <html lang="en" suppressHydrationWarning>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <Analytics />
