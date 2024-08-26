@@ -138,5 +138,43 @@ class ConversationService:
         )
         return result.matched_count
 
+    async def get_sharable_conversation(
+        self,
+        conversation_id: str,
+    ) -> Dict[str, Any]:
+        conversation = await self.conversation_collection.find_one(
+            {"_id": ObjectId(conversation_id), "sharable": True}
+        )
+
+        if conversation is None:
+            return None
+
+        conversation["_id"] = str(conversation["_id"])
+        return conversation
+
+    async def make_conversation_sharable(
+        self, conversation_id: str, user_id: str
+    ) -> bool:
+        conversation = await self.conversation_collection.find_one(
+            {"_id": ObjectId(conversation_id), "user_id": user_id}
+        )
+
+        if not conversation:
+            return False
+
+        if conversation.get("sharable", False):  # Changed True to False here
+            return True
+
+        result = await self.conversation_collection.update_one(
+            {"_id": ObjectId(conversation_id), "user_id": user_id},
+            {
+                "$set": {
+                    "sharable": True,
+                    "updated_at": datetime.utcnow(),
+                }
+            },
+        )
+        return result.modified_count == 1
+
 
 conversation_service = ConversationService()

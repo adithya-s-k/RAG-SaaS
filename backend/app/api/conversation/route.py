@@ -64,6 +64,16 @@ async def get_conversation(
     return {"messages": conversation.get("messages", [])}
 
 
+@conversation_router.get("/sharable/{conversation_id}")
+async def get_sharable_conversation(conversation_id: str):
+    conversation = await conversation_service.get_sharable_conversation(
+        conversation_id,
+    )
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Sharable conversation not found")
+    return {"messages": conversation.get("messages", [])}
+
+
 @conversation_router.delete("/{conversation_id}")
 async def delete_conversation(
     conversation_id: str, current_user: Dict[str, Any] = Depends(get_current_user)
@@ -94,6 +104,37 @@ async def delete_conversation(
 
 class ConversationSummaryUpdate(BaseModel):
     summary: str
+
+
+@conversation_router.patch("/{conversation_id}/share")
+async def edit_conversation_sharable(
+    conversation_id: str,
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        success = await conversation_service.make_conversation_sharable(
+            conversation_id, current_user.email
+        )
+        if success:
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    "message": f"Conversation {conversation_id} is now shareable."
+                },
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Conversation {conversation_id} not found for the current user.",
+            )
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.exception("Error updating conversation shareable status", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating conversation shareable status: {str(e)}",
+        ) from e
 
 
 @conversation_router.patch("/{conversation_id}/summary")
