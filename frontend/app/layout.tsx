@@ -67,7 +67,7 @@ export default function RootLayout({
     //   </ThemeProvider>
     // </html>
     <html lang="en" suppressHydrationWarning>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <Analytics />
         <AuthProvider>
           <ConversationProvider>

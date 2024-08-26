@@ -7,10 +7,12 @@ import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-van
 import { Suspense, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Loading from '@/components/loading';
+import { useAuth } from '@/app/authProvider';
 
 function HomeContent() {
   const { theme, setTheme } = useTheme();
   const [inputValue, setInputValue] = useState('');
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const placeholders = [
@@ -23,8 +25,14 @@ function HomeContent() {
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    router.push('chat');
-    setTimeout(() => {}, 1500);
+
+    setTimeout(() => {
+      if (isAuthenticated) {
+        router.push(`/chat?query=${encodeURIComponent(inputValue)}`);
+      } else {
+        router.push(`/signin`);
+      }
+    }, 1500); // 1500 milliseconds = 1.5 seconds
   };
 
   return (
