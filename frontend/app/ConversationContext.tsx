@@ -54,7 +54,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({
       before_that: [],
     }
   );
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <ConversationContext.Provider
