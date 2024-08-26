@@ -11,7 +11,7 @@ import ShinyButton from './magicui/shiny-button';
 const BannerCard: React.FC = () => {
   const { theme, setTheme } = useTheme();
   return (
-    <div className="relative h-fit md:1/2 lg:w-2/5 overflow-hidden rounded-xl drop-shadow-md">
+    <div className="relative h-fit md:1/2 lg:w-2/5 overflow-hidden rounded-2xl border-2 border-slate-500/10">
       <div className="relative z-10 p-4 bg-background/80 backdrop-blur-sm flex flex-col justify-center items-center gap-6">
         <Image
           src={
