@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.schemas.auth_schema import TokenPayload, AuthErrorOut, RefreshTokenRequest
 from app.schemas.user_schema import UserAuth, UserUpdate
 from pydantic import ValidationError
-from jose import jwt
+from jose import JWTError, jwt
 import pymongo
 
 auth_router = APIRouter()
@@ -108,17 +108,18 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
 async def refresh_token(response: Response, refresh_request: RefreshTokenRequest):
     try:
         payload = jwt.decode(
-            refresh_token,
+            refresh_request.refresh_token,
             settings.JWT_REFRESH_SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
         token_data = TokenPayload(**payload)
-    except (jwt.JWTError, ValidationError):
+    except (JWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     user = await user_service.get_user_by_id(token_data.sub)
     if not user:
         raise HTTPException(
