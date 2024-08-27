@@ -1,27 +1,23 @@
 name: Trigger auto deployment for rag-saas
 
-# When this action will be executed
 on:
-  # Automatically trigger it when detected changes in repo
   push:
     branches: 
-      [ main ]
+      - main
     paths:
-    - '**'
-    - '.github/workflows/rag-saas-AutoDeployTrigger-558fb23c-e0c6-46c5-a865-6f621534495e.yml'
-
-  # Allow manual trigger 
-  workflow_dispatch:      
+      - 'backend/**'
+      - '.github/workflows/rag-saas-AutoDeployTrigger-558fb23c-e0c6-46c5-a865-6f621534495e.yml'
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions: 
-      id-token: write #This is required for requesting the OIDC JWT Token
-      contents: read #Required when GH token is used to authenticate with private repo
+      id-token: write
+      contents: read
 
     steps:
-      - name: Checkout to the branch
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Azure Login
@@ -34,14 +30,11 @@ jobs:
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }} 
-          registryUrl: 
+          appSourcePath: ${{ github.workspace }}/backend
+          registryUrl: ${{ secrets.RAGSAAS_REGISTRY_URL }}
           registryUsername: ${{ secrets.RAGSAAS_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.RAGSAAS_REGISTRY_PASSWORD }}
           containerAppName: rag-saas
           resourceGroup: structify
-          imageToBuild: default/[parameters('containerAppName')]:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-
+          imageToBuild: ${{ secrets.RAGSAAS_REGISTRY_URL }}/rag-saas:${{ github.sha }}
+          dockerfilePath: Dockerfile
