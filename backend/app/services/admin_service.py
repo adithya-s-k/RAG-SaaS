@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 from bson import ObjectId, Binary
 from datetime import datetime
-from app.db import mongodb
+from app.db import async_mongodb
 from app.models.user_model import User
 from uuid import UUID
 
@@ -9,7 +9,7 @@ from uuid import UUID
 class AdminService:
     @property
     def user_collection(self):
-        return mongodb.db.users
+        return async_mongodb.db.users
 
     async def get_all_users(self) -> List[Dict[str, Any]]:
         users = await self.user_collection.find().to_list(length=None)

@@ -6,7 +6,7 @@ from app.core.security import get_password, verify_password
 from pymongo.errors import DuplicateKeyError
 from bson import Binary
 from dotenv import load_dotenv
-from app.db import mongodb
+from app.db import async_mongodb
 
 # Load environment variables
 load_dotenv()
@@ -15,7 +15,7 @@ load_dotenv()
 class UserService:
     @property
     def users_collection(self):
-        return mongodb.db.users
+        return async_mongodb.db.users
 
     async def create_user(self, user: UserAuth) -> User:
         user_obj = User(

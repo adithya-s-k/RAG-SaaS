@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from bson import ObjectId
 from dotenv import load_dotenv
-from app.db import mongodb
+from app.db import async_mongodb
 
 
 logger = logging.getLogger("uvicorn")
@@ -15,7 +15,7 @@ load_dotenv()
 class ConversationService:
     @property
     def conversation_collection(self):
-        return mongodb.db.conversation
+        return async_mongodb.db.conversation
 
     async def get_or_create_conversation(
         self, conversation_id: str, user_id: Optional[str] = None
