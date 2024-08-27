@@ -1,2 +1,4 @@
 /rag-venv
 backend/poetry.lock
+backend/rag_config.json
+backend/data/**
