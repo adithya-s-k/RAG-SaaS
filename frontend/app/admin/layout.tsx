@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AdminAuthProvider } from './AdminAuthProvider';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function AdminLayout({
   children,
@@ -10,7 +11,9 @@ export default function AdminLayout({
 }) {
   return (
     <AdminAuthProvider>
-      <main>{children}</main>
+      <ScrollArea className="w-full h-full">
+        <main>{children}</main>
+      </ScrollArea>
     </AdminAuthProvider>
   );
 }
