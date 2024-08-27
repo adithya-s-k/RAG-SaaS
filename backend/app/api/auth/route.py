@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Any
 from app.services import user_service
@@ -8,11 +8,11 @@ from app.schemas.user_schema import UserOut
 from app.models.user_model import User
 from app.core.user import get_current_user
 from app.core.config import settings
-from app.schemas.auth_schema import TokenPayload
+from app.schemas.auth_schema import TokenPayload, AuthErrorOut, RefreshTokenRequest
+from app.schemas.user_schema import UserAuth, UserUpdate
 from pydantic import ValidationError
 from jose import jwt
 import pymongo
-from app.schemas.user_schema import UserAuth, UserUpdate
 
 auth_router = APIRouter()
 
@@ -45,6 +45,11 @@ async def create_user(data: UserAuth):
     summary="Create access and refresh tokens for user",
     response_model=TokenSchema,
 )
+@auth_router.post(
+    "/login",
+    summary="Create access and refresh tokens for user",
+    response_model=TokenSchema,
+)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
     user = await user_service.authenticate(
         email=form_data.username, password=form_data.password
@@ -55,14 +60,52 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Any:
             detail="Incorrect email or password",
         )
 
+    if user.disabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is disabled",
+        )
+
     return {
         "access_token": create_access_token(user.user_id),
         "refresh_token": create_refresh_token(user.user_id),
     }
 
 
-@auth_router.post("/refresh", summary="Refresh token", response_model=TokenSchema)
-async def refresh_token(refresh_token: str = Body(...)):
+# @auth_router.post("/refresh", summary="Refresh token", response_model=TokenSchema)
+# async def refresh_token(refresh_token: str = Body(...)):
+#     try:
+#         payload = jwt.decode(
+#             refresh_token,
+#             settings.JWT_REFRESH_SECRET_KEY,
+#             algorithms=[settings.ALGORITHM],
+#         )
+#         token_data = TokenPayload(**payload)
+#     except (jwt.JWTError, ValidationError):
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Invalid token",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#     user = await user_service.get_user_by_id(token_data.sub)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail="Invalid token for user",
+#         )
+#     return {
+#         "access_token": create_access_token(user.user_id),
+#         "refresh_token": create_refresh_token(user.user_id),
+#     }
+
+
+@auth_router.post(
+    "/refresh",
+    response_model=TokenSchema,
+    summary="Refresh token",
+    responses={403: {"model": AuthErrorOut}, 404: {"model": AuthErrorOut}},
+)
+async def refresh_token(response: Response, refresh_request: RefreshTokenRequest):
     try:
         payload = jwt.decode(
             refresh_token,
@@ -82,9 +125,39 @@ async def refresh_token(refresh_token: str = Body(...)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Invalid token for user",
         )
+
+    if user.disabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is disabled",
+        )
+
+    new_access_token = create_access_token(user.user_id)
+    new_refresh_token = create_refresh_token(user.user_id)
+
+    # Set cookies
+    response.set_cookie(
+        key="accessToken",
+        value=new_access_token,
+        httponly=True,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        expires=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="lax",
+        secure=settings.COOKIE_SECURE,  # True in production
+    )
+    response.set_cookie(
+        key="refreshToken",
+        value=new_refresh_token,
+        httponly=True,
+        max_age=settings.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
+        expires=settings.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="lax",
+        secure=settings.COOKIE_SECURE,  # True in production
+    )
+
     return {
-        "access_token": create_access_token(user.user_id),
-        "refresh_token": create_refresh_token(user.user_id),
+        "access_token": new_access_token,
+        "refresh_token": new_refresh_token,
     }
 
 
