@@ -1,5 +1,5 @@
-import dynamic from "next/dynamic";
-import { Button } from "../../button";
+import dynamic from 'next/dynamic';
+import { Button } from '../../button';
 import {
   Drawer,
   DrawerClose,
@@ -8,7 +8,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "../../drawer";
+} from '../../drawer';
 
 export interface PdfDialogProps {
   documentId: string;
@@ -18,14 +18,14 @@ export interface PdfDialogProps {
 
 // Dynamic imports for client-side rendering only
 const PDFViewer = dynamic(
-  () => import("@llamaindex/pdf-viewer").then((module) => module.PDFViewer),
-  { ssr: false },
+  () => import('@llamaindex/pdf-viewer').then((module) => module.PDFViewer),
+  { ssr: false }
 );
 
 const PdfFocusProvider = dynamic(
   () =>
-    import("@llamaindex/pdf-viewer").then((module) => module.PdfFocusProvider),
-  { ssr: false },
+    import('@llamaindex/pdf-viewer').then((module) => module.PdfFocusProvider),
+  { ssr: false }
 );
 
 export default function PdfDialog(props: PdfDialogProps) {
@@ -37,7 +37,7 @@ export default function PdfDialog(props: PdfDialogProps) {
           <div className="space-y-2">
             <DrawerTitle>PDF Content</DrawerTitle>
             <DrawerDescription>
-              File URL:{" "}
+              File URL:{' '}
               <a
                 className="hover:text-blue-900"
                 href={props.url}
@@ -55,7 +55,7 @@ export default function PdfDialog(props: PdfDialogProps) {
           <PdfFocusProvider>
             <PDFViewer
               file={{
-                id: props.documentId,
+                id: props.url,
                 url: props.url,
               }}
             />
