@@ -66,11 +66,7 @@ interface AdminData {
 export default function AdminPage() {
   const { isAdminAuthenticated, adminData } = useAdminAuth();
   const { isAuthenticated, axiosInstance } = useAuth();
-  const [systemPrompt, setSystemPrompt] = useState<string>('');
-  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([
-    'What is RAG?',
-    'How does chunking work?',
-  ]);
+
   const [enableTools, setEnableTools] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -81,12 +77,41 @@ export default function AdminPage() {
     console.log(files);
   };
 
+  const [systemPrompt, setSystemPrompt] = useState<string>('');
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [configLoading, setConfigLoading] = useState<boolean>(true);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [systemPromptLoading, setSystemPromptLoading] = useState(false);
+  const [startersLoading, setStartersLoading] = useState(false);
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchUsers();
+      fetchConfig();
     }
   }, [isAuthenticated, axiosInstance]);
 
+  const fetchConfig = async () => {
+    setConfigLoading(true);
+    setConfigError(null);
+    try {
+      const [configResponse, systemPromptResponse] = await Promise.all([
+        axiosInstance.get('/api/chat/config'),
+        axiosInstance.get('/api/admin/system-prompt'),
+      ]);
+
+      const config = configResponse.data;
+      const systemPromptData = systemPromptResponse.data;
+
+      setSystemPrompt(systemPromptData.system_prompt || '');
+      setSuggestedQuestions(config.starterQuestions || []);
+      setConfigLoading(false);
+    } catch (err) {
+      const axiosError = err as AxiosError;
+      setConfigError(axiosError.message || 'Failed to fetch configuration');
+      setConfigLoading(false);
+    }
+  };
   const fetchUsers = async () => {
     try {
       const response = await axiosInstance.get<UsersResponse>(
@@ -122,6 +147,41 @@ export default function AdminPage() {
     } catch (err) {
       const axiosError = err as AxiosError;
       setError(axiosError.message || 'Failed to update user');
+    }
+  };
+
+  const updateSystemPrompt = async () => {
+    setSystemPromptLoading(true);
+    try {
+      const response = await axiosInstance.put('/api/admin/system-prompt', {
+        new_prompt: systemPrompt,
+      });
+      if (response.status === 200) {
+        console.log('System prompt updated successfully');
+      }
+    } catch (error) {
+      console.error('Failed to update system prompt:', error);
+      // Optionally, you can show an error message to the user
+    } finally {
+      setSystemPromptLoading(false);
+    }
+  };
+
+  const updateConversationStarters = async () => {
+    setStartersLoading(true);
+    try {
+      const response = await axiosInstance.put(
+        '/api/admin/conversation-starters',
+        { new_starters: suggestedQuestions.filter((q) => q.trim() !== '') }
+      );
+      if (response.status === 200) {
+        console.log('Conversation starters updated successfully');
+      }
+    } catch (error) {
+      console.error('Failed to update conversation starters:', error);
+      // Optionally, you can show an error message to the user
+    } finally {
+      setStartersLoading(false);
     }
   };
 
@@ -317,19 +377,6 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="ragTechnique">RAG Technique</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a RAG technique" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="basic">Basic RAG</SelectItem>
-                    <SelectItem value="advanced">Advanced RAG</SelectItem>
-                    <SelectItem value="hybrid">Hybrid RAG</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
                 <Label htmlFor="systemPrompt">System Prompt</Label>
                 <Textarea
                   id="systemPrompt"
@@ -337,6 +384,13 @@ export default function AdminPage() {
                   onChange={(e) => setSystemPrompt(e.target.value)}
                   placeholder="Enter system prompt here..."
                 />
+                <Button
+                  onClick={updateSystemPrompt}
+                  className="mt-2"
+                  disabled={systemPromptLoading}
+                >
+                  {systemPromptLoading ? 'Updating...' : 'Update System Prompt'}
+                </Button>
               </div>
               <div>
                 <Label>Suggested Questions</Label>
@@ -366,15 +420,17 @@ export default function AdminPage() {
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Add Question
                 </Button>
+                <Button
+                  onClick={updateConversationStarters}
+                  className="mt-2 ml-2"
+                  disabled={startersLoading}
+                >
+                  {startersLoading
+                    ? 'Updating...'
+                    : 'Update Conversation Starters'}
+                </Button>
               </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="enableTools"
-                  checked={enableTools}
-                  onCheckedChange={setEnableTools}
-                />
-                <Label htmlFor="enableTools">Enable Tools</Label>
-              </div>
+              {/* ... (other inputs remain the same) */}
             </CardContent>
           </Card>
         </TabsContent>
