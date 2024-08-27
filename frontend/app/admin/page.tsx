@@ -32,10 +32,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import {
+  LoaderCircle,
+  LoaderIcon,
+  PlusCircle,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AxiosError } from 'axios';
 import { FileUpload } from '@/components/ui/file-upload';
+import { Separator } from '@/components/ui/separator';
 
 interface User {
   user_id: string;
@@ -56,12 +63,6 @@ interface UserUpdateData {
   role?: string;
   disabled?: boolean;
 }
-interface AdminData {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  role?: string;
-}
 
 export default function AdminPage() {
   const { isAdminAuthenticated, adminData } = useAdminAuth();
@@ -71,11 +72,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [files, setFiles] = useState<File[]>([]);
-  const handleFileUpload = (files: File[]) => {
-    setFiles(files);
-    console.log(files);
-  };
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState<string | null>(null);
 
   const [systemPrompt, setSystemPrompt] = useState<string>('');
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
@@ -83,6 +82,10 @@ export default function AdminPage() {
   const [configError, setConfigError] = useState<string | null>(null);
   const [systemPromptLoading, setSystemPromptLoading] = useState(false);
   const [startersLoading, setStartersLoading] = useState(false);
+  const [initialSystemPrompt, setInitialSystemPrompt] = useState<string>('');
+  const [initialSuggestedQuestions, setInitialSuggestedQuestions] = useState<
+    string[]
+  >([]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -104,7 +107,9 @@ export default function AdminPage() {
       const systemPromptData = systemPromptResponse.data;
 
       setSystemPrompt(systemPromptData.system_prompt || '');
+      setInitialSystemPrompt(systemPromptData.system_prompt || '');
       setSuggestedQuestions(config.starterQuestions || []);
+      setInitialSuggestedQuestions(config.starterQuestions || []);
       setConfigLoading(false);
     } catch (err) {
       const axiosError = err as AxiosError;
@@ -112,6 +117,7 @@ export default function AdminPage() {
       setConfigLoading(false);
     }
   };
+
   const fetchUsers = async () => {
     try {
       const response = await axiosInstance.get<UsersResponse>(
@@ -158,10 +164,10 @@ export default function AdminPage() {
       });
       if (response.status === 200) {
         console.log('System prompt updated successfully');
+        setInitialSystemPrompt(systemPrompt);
       }
     } catch (error) {
       console.error('Failed to update system prompt:', error);
-      // Optionally, you can show an error message to the user
     } finally {
       setSystemPromptLoading(false);
     }
@@ -170,18 +176,60 @@ export default function AdminPage() {
   const updateConversationStarters = async () => {
     setStartersLoading(true);
     try {
+      const newStarters = suggestedQuestions.filter((q) => q.trim() !== '');
       const response = await axiosInstance.put(
         '/api/admin/conversation-starters',
-        { new_starters: suggestedQuestions.filter((q) => q.trim() !== '') }
+        { new_starters: newStarters }
       );
       if (response.status === 200) {
         console.log('Conversation starters updated successfully');
+        setInitialSuggestedQuestions(newStarters);
       }
     } catch (error) {
       console.error('Failed to update conversation starters:', error);
-      // Optionally, you can show an error message to the user
     } finally {
       setStartersLoading(false);
+    }
+  };
+
+  const isSystemPromptChanged = systemPrompt !== initialSystemPrompt;
+  const areSuggestedQuestionsChanged =
+    JSON.stringify(suggestedQuestions) !==
+    JSON.stringify(initialSuggestedQuestions);
+
+  const handleFileUpload = (files: File[]) => {
+    if (files.length > 0) {
+      setFile(files[0]);
+    }
+  };
+
+  const uploadFile = async () => {
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadResult(null);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axiosInstance.post(
+        '/api/admin/upload_data',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      setUploadResult(`File uploaded successfully. ${response.data.message}`);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      setUploadResult('Error uploading file. Please try again.');
+    } finally {
+      setIsUploading(false);
+      setFile(null); // Reset file state after upload attempt
     }
   };
 
@@ -334,12 +382,40 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="w-full  mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg">
+                <div className="w-full mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg">
                   <FileUpload onChange={handleFileUpload} />
                 </div>
+                {file && (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        onClick={uploadFile}
+                        disabled={isUploading}
+                        variant="default"
+                        className="flex items-center w-full"
+                      >
+                        {isUploading ? (
+                          <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Upload className="mr-2 h-4 w-4" />
+                        )}
+                        {isUploading
+                          ? 'Uploading and Ingesting...'
+                          : 'Ingest File'}
+                      </Button>
+                    </div>
+                  </>
+                )}
+                {uploadResult && (
+                  <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    {uploadResult}
+                  </div>
+                )}
                 <div>
-                  <Label htmlFor="ingestionStrategy">Ingestion Strategy</Label>
-                  <Select>
+                  <Label htmlFor="ingestionStrategy">
+                    Ingestion Strategy (Coming Soon)
+                  </Label>
+                  <Select disabled>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a strategy" />
                     </SelectTrigger>
@@ -352,7 +428,7 @@ export default function AdminPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="parser">Parser</Label>
+                  <Label htmlFor="parser">Parser (Coming Soon)</Label>
                   <Select disabled>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a parser" />
@@ -386,12 +462,14 @@ export default function AdminPage() {
                 />
                 <Button
                   onClick={updateSystemPrompt}
-                  className="mt-2"
-                  disabled={systemPromptLoading}
+                  className="mt-2 w-full"
+                  variant={isSystemPromptChanged ? 'default' : 'secondary'}
+                  disabled={systemPromptLoading || !isSystemPromptChanged}
                 >
                   {systemPromptLoading ? 'Updating...' : 'Update System Prompt'}
                 </Button>
               </div>
+              <Separator />
               <div>
                 <Label>Suggested Questions</Label>
                 {suggestedQuestions.map((question, index) => (
@@ -412,25 +490,29 @@ export default function AdminPage() {
                     </Button>
                   </div>
                 ))}
-                <Button
-                  variant="outline"
-                  className="mt-2"
-                  onClick={addSuggestedQuestion}
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Question
-                </Button>
-                <Button
-                  onClick={updateConversationStarters}
-                  className="mt-2 ml-2"
-                  disabled={startersLoading}
-                >
-                  {startersLoading
-                    ? 'Updating...'
-                    : 'Update Conversation Starters'}
-                </Button>
+                <div className="w-full flex justify-between items-center mt-2">
+                  <Button
+                    variant="outline"
+                    className="mt-2"
+                    onClick={addSuggestedQuestion}
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Question
+                  </Button>
+                  <Button
+                    variant={
+                      areSuggestedQuestionsChanged ? 'default' : 'secondary'
+                    }
+                    onClick={updateConversationStarters}
+                    className="mt-2 ml-2"
+                    disabled={startersLoading || !areSuggestedQuestionsChanged}
+                  >
+                    {startersLoading
+                      ? 'Updating...'
+                      : 'Update Conversation Starters'}
+                  </Button>
+                </div>
               </div>
-              {/* ... (other inputs remain the same) */}
             </CardContent>
           </Card>
         </TabsContent>
