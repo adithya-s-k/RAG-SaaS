@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAdminAuth } from './AdminAuthProvider';
+import { useAuth } from '@/app/authProvider';
 import Loading from '@/components/loading';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -32,56 +33,96 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Trash2 } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { AvatarImage } from '@radix-ui/react-avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AxiosError } from 'axios';
+import { FileUpload } from '@/components/ui/file-upload';
+
+interface User {
+  user_id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  role: string;
+  disabled?: boolean;
+}
+
+interface UsersResponse {
+  users: User[];
+}
+
+interface UserUpdateData {
+  first_name?: string;
+  last_name?: string;
+  role?: string;
+  disabled?: boolean;
+}
+interface AdminData {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
+}
 
 export default function AdminPage() {
   const { isAdminAuthenticated, adminData } = useAdminAuth();
-  const [users, setUsers] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', isAdmin: false },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', isAdmin: true },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', isAdmin: false },
-  ]);
-  const [file, setFile] = useState(null);
-  const [systemPrompt, setSystemPrompt] = useState('');
-  const [suggestedQuestions, setSuggestedQuestions] = useState([
+  const { isAuthenticated, axiosInstance } = useAuth();
+  const [systemPrompt, setSystemPrompt] = useState<string>('');
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([
     'What is RAG?',
     'How does chunking work?',
   ]);
-  const [enableTools, setEnableTools] = useState(false);
-
-  if (!isAdminAuthenticated) {
-    return <Loading />;
-  }
-
-  const toggleAdminStatus = (userId: number) => {
-    setUsers(
-      users.map((user) =>
-        user.id === userId ? { ...user, isAdmin: !user.isAdmin } : user
-      )
-    );
+  const [enableTools, setEnableTools] = useState<boolean>(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const handleFileUpload = (files: File[]) => {
+    setFiles(files);
+    console.log(files);
   };
 
-  const deleteUser = (userId: number) => {
-    setUsers(users.filter((user) => user.id !== userId));
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUsers();
+    }
+  }, [isAuthenticated, axiosInstance]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axiosInstance.get<UsersResponse>(
+        '/api/admin/users'
+      );
+      setUsers(response.data.users);
+      setLoading(false);
+    } catch (err) {
+      const axiosError = err as AxiosError;
+      setError(axiosError.message || 'Failed to fetch users');
+      setLoading(false);
+    }
   };
 
-  const handleFileUpload = (event: { target: { files: any[] } }) => {
-    const uploadedFile = event.target.files[0];
-    setFile(uploadedFile);
+  const deleteUser = async (userId: string) => {
+    try {
+      await axiosInstance.delete(`/api/admin/users/${userId}`);
+      setUsers(users.filter((user) => user.user_id !== userId));
+    } catch (err) {
+      const axiosError = err as AxiosError;
+      setError(axiosError.message || 'Failed to delete user');
+    }
   };
 
-  const handleDragOver = (event: { preventDefault: () => void }) => {
-    event.preventDefault();
-  };
-
-  const handleDrop = (event: {
-    preventDefault: () => void;
-    dataTransfer: { files: any[] };
-  }) => {
-    event.preventDefault();
-    const droppedFile = event.dataTransfer.files[0];
-    setFile(droppedFile);
+  const updateUser = async (userId: string, updatedData: UserUpdateData) => {
+    try {
+      await axiosInstance.put(`/api/admin/users/${userId}`, updatedData);
+      setUsers(
+        users.map((user) =>
+          user.user_id === userId ? { ...user, ...updatedData } : user
+        )
+      );
+    } catch (err) {
+      const axiosError = err as AxiosError;
+      setError(axiosError.message || 'Failed to update user');
+    }
   };
 
   const addSuggestedQuestion = () => {
@@ -99,10 +140,18 @@ export default function AdminPage() {
     setSuggestedQuestions(updatedQuestions);
   };
 
+  if (!isAdminAuthenticated) {
+    return <Loading />;
+  }
+
+  if (loading) return <Loading />;
+  if (error) return <div>Error: {error}</div>;
+  if (!isAuthenticated) return <div>Unauthorized</div>;
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+      <div className="flex-col md:flex md:flex-row justify-between items-center mb-6 ">
+        <h1 className="text-2xl font-bold py-2">Dashboard</h1>
 
         {adminData && Object.keys(adminData).length > 0 && (
           <Card className="flex items-center space-x-4 p-4">
@@ -142,10 +191,8 @@ export default function AdminPage() {
         <TabsContent value="users">
           <Card>
             <CardHeader>
-              <CardTitle>Users Tracking</CardTitle>
-              <CardDescription>
-                Monitor and manage user activity.
-              </CardDescription>
+              <CardTitle>Users Management</CardTitle>
+              <CardDescription>Manage user accounts</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -153,33 +200,65 @@ export default function AdminPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Admin Status</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant={user.isAdmin ? 'default' : 'outline'}
-                          onClick={() => toggleAdminStatus(user.id)}
-                        >
-                          {user.isAdmin ? 'Admin' : 'User'}
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="destructive"
-                          onClick={() => deleteUser(user.id)}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {users
+                    .filter((user) => user.email !== adminData?.email)
+                    .map((user) => (
+                      <TableRow key={user.user_id}>
+                        <TableCell>
+                          {`${user.first_name || ''} ${
+                            user.last_name || ''
+                          }`.trim()}
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Select
+                            onValueChange={(value) =>
+                              updateUser(user.user_id, {
+                                role: value as string,
+                              })
+                            }
+                            defaultValue={user.role}
+                            disabled={
+                              user.role === 'admin' &&
+                              users.filter((u) => u.role === 'admin').length ===
+                                1
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={!user.disabled}
+                            onCheckedChange={(checked) =>
+                              updateUser(user.user_id, { disabled: !checked })
+                            }
+                            disabled={user.role === 'admin'}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="destructive"
+                            onClick={() => deleteUser(user.user_id)}
+                            disabled={user.role === 'admin'}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -194,24 +273,10 @@ export default function AdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* <div
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4 text-center cursor-pointer"
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-              >
-                <p>Drag and drop your file here, or click to select a file</p>
-                <input
-                  type="file"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="fileUpload"
-                />
-                <label htmlFor="fileUpload">
-                  <Button className="mt-2">Upload File</Button>
-                </label>
-              </div> */}
-              {/* {file && <p className="mb-4">Selected file: {file.name}</p>} */}
               <div className="space-y-4">
+                <div className="w-full  mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg">
+                  <FileUpload onChange={handleFileUpload} />
+                </div>
                 <div>
                   <Label htmlFor="ingestionStrategy">Ingestion Strategy</Label>
                   <Select>
