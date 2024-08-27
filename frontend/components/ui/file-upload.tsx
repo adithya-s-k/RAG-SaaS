@@ -11,8 +11,8 @@ const mainVariant = {
     y: 0,
   },
   animate: {
-    x: 20,
-    y: -20,
+    x: 10,
+    y: -10,
     opacity: 0.9,
   },
 };
@@ -26,17 +26,45 @@ const secondaryVariant = {
   },
 };
 
+const allowedFileTypes = '.pdf,.doc,.docx,.txt,.md';
+
 export const FileUpload = ({
   onChange,
 }: {
   onChange?: (files: File[]) => void;
 }) => {
+  // const [files, setFiles] = useState<File[]>([]);
+  // const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // const handleFileChange = (newFiles: File[]) => {
+  //   setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  //   onChange && onChange(newFiles);
+  // };
+
+  // const handleClick = () => {
+  //   fileInputRef.current?.click();
+  // };
+
+  // const { getRootProps, isDragActive } = useDropzone({
+  //   multiple: false,
+  //   noClick: true,
+  //   onDrop: handleFileChange,
+  //   onDropRejected: (error) => {
+  //     console.log(error);
+  //   },
+  // });
+
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (newFiles: File[]) => {
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    onChange && onChange(newFiles);
+    const validFiles = newFiles.filter((file) => {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      return ['pdf', 'doc', 'docx', 'txt', 'md'].includes(fileExtension || '');
+    });
+
+    setFiles((prevFiles) => [...prevFiles, ...validFiles]);
+    onChange && onChange(validFiles);
   };
 
   const handleClick = () => {
@@ -47,11 +75,18 @@ export const FileUpload = ({
     multiple: false,
     noClick: true,
     onDrop: handleFileChange,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        ['.docx'],
+      'text/plain': ['.txt'],
+      'text/markdown': ['.md'],
+    },
     onDropRejected: (error) => {
       console.log(error);
     },
   });
-
   return (
     <div className="w-full" {...getRootProps()}>
       <motion.div
@@ -63,6 +98,7 @@ export const FileUpload = ({
           ref={fileInputRef}
           id="file-upload-handle"
           type="file"
+          accept={allowedFileTypes}
           onChange={(e) => handleFileChange(Array.from(e.target.files || []))}
           className="hidden"
         />
@@ -76,7 +112,11 @@ export const FileUpload = ({
           <p className="relative z-20 font-sans font-normal text-neutral-400 dark:text-neutral-400 text-base mt-2">
             Drag or drop your files here or click to upload
           </p>
-          <div className="relative w-full mt-10 max-w-xl mx-auto">
+          <p className="relative z-20 font-sans font-normal text-neutral-400 dark:text-neutral-400 text-base mt-2">
+            Allowed File type: {allowedFileTypes}
+          </p>
+
+          <div className="relative w-full mt-10  mx-auto">
             {files.length > 0 &&
               files.map((file, idx) => (
                 <motion.div
