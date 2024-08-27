@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 
 function ChatContent() {
-  const { isAuthenticated, accessToken } = useAuth();
+  const { accessToken, axiosInstance } = useAuth();
   const { backend } = useClientConfig();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,14 +24,6 @@ function ChatContent() {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const axiosInstance = axios.create({
-    baseURL: backend,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
 
   const fetchMessages = async () => {
     if (!conversationId) return;
