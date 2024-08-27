@@ -33,6 +33,7 @@ class MongoDB:
         if not existing_user:
             admin_user = User(
                 first_name=ADMIN_USERNAME,
+                last_name=ADMIN_USERNAME,
                 email=ADMIN_EMAIL,
                 hashed_password=get_password(ADMIN_PASSWORD),
                 role="admin",
