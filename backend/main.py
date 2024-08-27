@@ -7,6 +7,7 @@ load_dotenv()
 
 import logging
 import os
+import json
 
 import uvicorn
 
@@ -18,7 +19,7 @@ from app.api.conversation import conversation_router
 from app.api.admin import admin_router
 from app.observability import init_observability
 from app.settings import init_settings
-from app.db import mongodb
+from app.db import async_mongodb, sync_mongodb
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,12 +31,13 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Connect to the database
-    await mongodb.connect_to_database()
-    await mongodb.create_admin_user()
+    await async_mongodb.connect_to_database()
+    sync_mongodb.connect_to_database()
+    await async_mongodb.database_init()
     yield
     # Shutdown: Close the database connection
-    await mongodb.close_database_connection()
+    sync_mongodb.close_database_connection()
+    await async_mongodb.close_database_connection()
 
 
 app = FastAPI(lifespan=lifespan)
