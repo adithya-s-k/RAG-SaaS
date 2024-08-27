@@ -5,7 +5,7 @@ import boto3
 import tempfile
 import shutil
 from dotenv import load_dotenv
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, status  
 from fastapi.responses import JSONResponse
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, EmailStr, Field
@@ -68,7 +68,7 @@ class UserUpdate(BaseModel):
 def verify_admin(current_user: User = Depends(get_current_user)):
     if current_user.role != "admin":
         raise HTTPException(
-            status_code=Status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to access this resource",
         )
     return current_user
