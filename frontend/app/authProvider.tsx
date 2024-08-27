@@ -3,7 +3,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -20,6 +21,7 @@ interface AuthContextType {
     lastName: string
   ) => void;
   logout: () => void;
+  axiosInstance: AxiosInstance;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,14 +39,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const axiosInstance = axios.create({
+  const refreshAccessToken = async () => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/refresh`,
+        { refresh_token: refreshToken }
+      );
+      const { access_token, refresh_token } = response.data.tokens;
+      setAccessToken(access_token);
+      setRefreshToken(refresh_token);
+      Cookies.set('accessToken', access_token, { expires: 7 });
+      Cookies.set('refreshToken', refresh_token, { expires: 7 });
+      return access_token;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      logout();
+      return null;
+    }
+  };
+
+  const axiosInstance: AxiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
     },
   });
 
+  axiosInstance.interceptors.request.use(
+    async (config) => {
+      if (accessToken) {
+        try {
+          const decodedToken = jwtDecode<JwtPayload>(accessToken);
+          const currentTime = Date.now() / 1000;
+
+          if (decodedToken.exp && decodedToken.exp < currentTime) {
+            const newAccessToken = await refreshAccessToken();
+            if (newAccessToken) {
+              config.headers['Authorization'] = `Bearer ${newAccessToken}`;
+            } else {
+              // If we couldn't refresh the token, we should probably log out the user
+              logout();
+              throw new axios.Cancel('Session expired. Please log in again.');
+            }
+          } else {
+            config.headers['Authorization'] = `Bearer ${accessToken}`;
+          }
+        } catch (error) {
+          console.error('Error processing token:', error);
+          logout();
+          throw new axios.Cancel('Invalid token. Please log in again.');
+        }
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
   useEffect(() => {
     const checkAuthStatus = async () => {
       const currentAccessToken = Cookies.get('accessToken');
@@ -122,6 +173,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshToken,
         login,
         logout,
+        axiosInstance,
       }}
     >
       {children}
