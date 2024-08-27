@@ -48,7 +48,7 @@ interface Conversation {
 const MAX_SUMMARY_LENGTH = 27;
 
 function HistoryComponent() {
-  const { isAuthenticated, firstName, lastName, email, logout, accessToken } =
+  const { isAuthenticated, firstName, lastName, email, axiosInstance } =
     useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,14 +60,6 @@ function HistoryComponent() {
   const [editedSummaries, setEditedSummaries] = useState<{
     [key: string]: string;
   }>({});
-
-  const axiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_SERVER_URL,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
 
   const fetchConversations = async () => {
     if (!isAuthenticated) return;
@@ -127,9 +119,6 @@ function HistoryComponent() {
     const confirmed = window.confirm(
       'Are you sure you want to delete this conversation?'
     );
-
-    router.push(`/chat?conversation_id=${conversationId}`);
-
     if (!confirmed) return;
     try {
       await axiosInstance.delete(`/api/conversation/${conversationId}`);
@@ -227,7 +216,7 @@ function HistoryComponent() {
       </Button>
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full px-2">
-          {Object.entries(conversationList).map(
+          {/* {Object.entries(conversationList).map(
             ([dateCategory, conversations]) =>
               conversations.length > 0 ? (
                 <div key={dateCategory} className="mb-3">
@@ -244,13 +233,15 @@ function HistoryComponent() {
                       <div
                         key={conversation._id}
                         className="flex items-center justify-between px-2 py-1 hover:bg-accent rounded-md cursor-pointer"
-                        onClick={() =>
-                          router.push(
-                            `/chat?conversation_id=${conversation._id}`
-                          )
-                        }
                       >
-                        <div className="flex items-center space-x-3 overflow-hidden">
+                        <div
+                          className="flex items-center space-x-3 overflow-hidden"
+                          onClick={() =>
+                            router.push(
+                              `/chat?conversation_id=${conversation._id}`
+                            )
+                          }
+                        >
                           <MessageSquare className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                           {isEditing === conversation._id ? (
                             <Input
@@ -288,6 +279,97 @@ function HistoryComponent() {
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-36">
+                            <DropdownMenuItem
+                              onClick={() => setIsEditing(conversation._id)}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleShareClick(conversation._id)}
+                            >
+                              Share
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleDeleteClick(conversation._id)
+                              }
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    ))}
+                </div>
+              ) : null
+          )} */}
+          {Object.entries(conversationList).map(
+            ([dateCategory, conversations]) =>
+              conversations.length > 0 ? (
+                <div key={dateCategory} className="mb-3">
+                  <h3 className="text-sm font-bold my-2 capitalize text-muted-foreground">
+                    {dateCategory.replace(/_/g, ' ')}
+                  </h3>
+                  {conversations
+                    .sort(
+                      (a: { updated_at: any }, b: { updated_at: any }) =>
+                        new Date(b.updated_at || '').getTime() -
+                        new Date(a.updated_at || '').getTime()
+                    )
+                    .map((conversation: Conversation) => (
+                      <div
+                        key={conversation._id}
+                        className="flex items-center justify-between px-2 py-1 hover:bg-accent rounded-md"
+                      >
+                        <div
+                          className="flex items-center space-x-3 overflow-hidden flex-grow cursor-pointer"
+                          onClick={() =>
+                            router.push(
+                              `/chat?conversation_id=${conversation._id}`
+                            )
+                          }
+                        >
+                          <MessageSquare className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          {isEditing === conversation._id ? (
+                            <Input
+                              value={editedSummaries[conversation._id]}
+                              onChange={(e) =>
+                                setEditedSummaries((prev) => ({
+                                  ...prev,
+                                  [conversation._id]: e.target.value,
+                                }))
+                              }
+                              onBlur={() => handleEditSubmit(conversation._id)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleEditSubmit(conversation._id);
+                                }
+                              }}
+                              className="h-full text-md w-full focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                              placeholder="Edited Summary"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          ) : (
+                            <span className="truncate text-base">
+                              {conversation.summary.length > MAX_SUMMARY_LENGTH
+                                ? `${conversation.summary.substring(
+                                    0,
+                                    MAX_SUMMARY_LENGTH
+                                  )}...`
+                                : conversation.summary}
+                            </span>
+                          )}
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-8 p-0 ml-2 hover:bg-accent-foreground hover:text-accent"
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
