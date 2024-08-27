@@ -222,6 +222,6 @@ class ChatConfig(BaseModel):
                 "starterQuestions": [
                     "What standards for letters exist?",
                     "What are the requirements for a letter to be considered a letter?",
-                ]
+                ],
             }
         }
