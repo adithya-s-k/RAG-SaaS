@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshAccessToken = async () => {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/refresh`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/refresh`,
         { refresh_token: refreshToken }
       );
       const { access_token, refresh_token } = response.data.tokens;
