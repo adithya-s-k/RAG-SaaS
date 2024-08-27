@@ -17,7 +17,7 @@ from app.services.config_service import config_service
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.settings import Settings
-from app.engine.vectordb import get_vector_store
+from app.api.chat.engine.vectordb import get_vector_store
 from llama_index.core import SimpleDirectoryReader
 from llama_index.core.schema import Document
 

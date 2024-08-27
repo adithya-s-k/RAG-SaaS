@@ -1,9 +1,9 @@
 import logging
 
 import yaml
-from app.engine.loaders.db import DBLoaderConfig, get_db_documents
-from app.engine.loaders.file import FileLoaderConfig, get_file_documents
-from app.engine.loaders.web import WebLoaderConfig, get_web_documents
+from app.api.chat.engine.loaders.db import DBLoaderConfig, get_db_documents
+from app.api.chat.engine.loaders.file import FileLoaderConfig, get_file_documents
+from app.api.chat.engine.loaders.web import WebLoaderConfig, get_web_documents
 
 logger = logging.getLogger(__name__)
 

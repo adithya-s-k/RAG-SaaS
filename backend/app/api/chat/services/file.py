@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, List, Tuple
 
 
-from app.engine.index import get_index
+from app.api.chat.engine.index import get_index
 from llama_index.core import VectorStoreIndex
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.readers.file.base import (
@@ -18,8 +18,8 @@ from llama_index.readers.file import FlatReader
 
 
 def get_llamaparse_parser():
-    from app.engine.loaders import load_configs
-    from app.engine.loaders.file import FileLoaderConfig, llama_parse_parser
+    from app.api.chat.engine.loaders import load_configs
+    from app.api.chat.engine.loaders.file import FileLoaderConfig, llama_parse_parser
 
     config = load_configs()
     file_loader_config = FileLoaderConfig(**config["file"])
@@ -81,7 +81,7 @@ class PrivateFileService:
 
         # Insert the documents into the index
         if isinstance(current_index, LlamaCloudIndex):
-            from app.engine.service import LLamaCloudFileService
+            from app.api.chat.engine.service import LLamaCloudFileService
 
             project_id = current_index._get_project_id()
             pipeline_id = current_index._get_pipeline_id()

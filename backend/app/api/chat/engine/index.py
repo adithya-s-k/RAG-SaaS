@@ -1,6 +1,6 @@
 import logging
 from llama_index.core.indices import VectorStoreIndex
-from app.engine.vectordb import get_vector_store
+from app.api.chat.engine.vectordb import get_vector_store
 
 
 logger = logging.getLogger("uvicorn")

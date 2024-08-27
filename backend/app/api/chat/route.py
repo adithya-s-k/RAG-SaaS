@@ -20,8 +20,8 @@ from app.api.chat.models import (
     SourceNodes,
 )
 from app.api.chat.vercel_response import VercelStreamResponse
-from app.engine import get_chat_engine
-from app.engine.query_filter import generate_filters
+from app.api.chat.engine import get_chat_engine
+from app.api.chat.engine.query_filter import generate_filters
 from app.models.user_model import User
 from app.core.user import get_current_user
 from app.api.chat.summary import summary_generator
@@ -184,7 +184,7 @@ async def chat(
 # ):
 #     try:
 #         # Start background tasks to download documents from LlamaCloud if needed
-#         from app.engine.service import LLamaCloudFileService
+#         from app.api.chat.engine.service import LLamaCloudFileService
 
 #         LLamaCloudFileService.download_files_from_nodes(nodes, background_tasks)
 #     except ImportError:

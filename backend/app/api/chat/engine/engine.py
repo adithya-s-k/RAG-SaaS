@@ -1,7 +1,7 @@
 import os
 
-from app.engine.index import get_index
-from app.engine.node_postprocessors import NodeCitationProcessor
+from app.api.chat.engine.index import get_index
+from app.api.chat.engine.node_postprocessors import NodeCitationProcessor
 from fastapi import HTTPException
 from llama_index.core.chat_engine import CondensePlusContextChatEngine
 

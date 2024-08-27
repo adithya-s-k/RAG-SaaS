@@ -6,8 +6,8 @@ load_dotenv()
 import logging
 import os
 
-from app.engine.loaders import get_documents
-from app.engine.vectordb import get_vector_store
+from app.api.chat.engine.loaders import get_documents
+from app.api.chat.engine.vectordb import get_vector_store
 from app.settings import init_settings
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import SentenceSplitter
