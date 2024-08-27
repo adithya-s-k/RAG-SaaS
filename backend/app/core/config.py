@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:3000"]
     PROJECT_NAME: str = "FODOIST"
+    COOKIE_SECURE: bool = False
 
     # Database
     MONGO_CONNECTION_STRING: str = config("MONGODB_URI", cast=str)
