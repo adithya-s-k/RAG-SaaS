@@ -1,16 +1,39 @@
-# RAG-SaaS: Ship RAG Solutions Quickly
+<p align="center">
+  <img alt="RAG-SaaS Logo" src="./assets/banner.png" width="60%">
+</p>
 
-![RAG SAAS](./assets/banner.png)
+<p align="center">
+  <strong>A complete Software-as-a-Service (SaaS) for Retrieval-Augmented Generation (RAG) and Agentic based applications.</strong><br>
+  Customizable, end-to-end solution for rapid RAG system deployment.
+</p>
 
-[![GitHub Stars](https://img.shields.io/github/stars/adithya-s-k/RAG-SaaS?style=social)](https://github.com/adithya-s-k/RAG-SaaS/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/adithya-s-k/RAG-SaaS?style=social)](https://github.com/adithya-s-k/RAG-SaaS/network/members)
-[![GitHub Issues](https://img.shields.io/github/issues/adithya-s-k/RAG-SaaS)](https://github.com/adithya-s-k/RAG-SaaS/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/adithya-s-k/RAG-SaaS)](https://github.com/adithya-s-k/RAG-SaaS/pulls)
-[![License](https://img.shields.io/github/license/adithya-s-k/RAG-SaaS)](https://github.com/adithya-s-k/RAG-SaaS/blob/main/LICENSE)
+<p align="center">
+  <a href="#-features">Features</a> ·
+  <a href="#%EF%B8%8F-tech-stack">Tech Stack</a> ·
+  <a href="#-getting-started">Getting Started</a> ·
+  <a href="#-docker-compose-deployment">Deployment</a> ·
+  <a href="#roadmap">Roadmap</a>
+</p>
 
-RAG-SaaS is a complete Software-as-a-Service (SaaS) template for Retrieval-Augmented Generation (RAG) based applications. It provides a customizable, end-to-end solution for developers looking to quickly deploy RAG systems without worrying about the underlying infrastructure.
+<p align="center">
+  <a href="https://github.com/adithya-s-k/RAG-SaaS/stargazers">
+    <img src="https://img.shields.io/github/stars/adithya-s-k/RAG-SaaS?style=social" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/adithya-s-k/RAG-SaaS/network/members">
+    <img src="https://img.shields.io/github/forks/adithya-s-k/RAG-SaaS?style=social" alt="GitHub Forks">
+  </a>
+  <a href="https://github.com/adithya-s-k/RAG-SaaS/issues">
+    <img src="https://img.shields.io/github/issues/adithya-s-k/RAG-SaaS" alt="GitHub Issues">
+  </a>
+  <a href="https://github.com/adithya-s-k/RAG-SaaS/pulls">
+    <img src="https://img.shields.io/github/issues-pr/adithya-s-k/RAG-SaaS" alt="GitHub Pull Requests">
+  </a>
+  <a href="https://github.com/adithya-s-k/RAG-SaaS/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/adithya-s-k/RAG-SaaS" alt="License">
+  </a>
+</p>
 
-## 🚀 Features
+## Features
 
 - 🔐 Basic Authentication
 - 💬 Chat History Tracking
@@ -24,104 +47,242 @@ RAG-SaaS is a complete Software-as-a-Service (SaaS) template for Retrieval-Augme
 - 🗄️ S3 Integration for PDF uploads
 - 🐳 Easy Deployment with Docker / Docker Compose
 
-## 🏗️ Tech Stack
+## Tech Stack
 
-- 🦙 LlamaIndex: For building and deploying RAG pipelines
+- 🦙 LlamaIndex: For building and orchestrating RAG pipelines
 - 📦 MongoDB: Used as both a normal database and a vector database
 - ⚡ FastAPI: Backend API framework
 - ⚛️ Next.js: Frontend framework
+- 🔍 Qdrant: Vector database for efficient similarity search
+- 👁️ Arize Phoenix: Observability Platform to monitor/evaluate your RAG system
 
 ## 🌟 Why RAG-SaaS?
 
-Setting up reliable RAG systems can be time-consuming and complex. RAG-SaaS allows developers to focus on fine-tuning their RAG pipeline rather than worrying about packaging it into a usable application. Built on top of [create-llama](https://www.llamaindex.ai/blog/create-llama-a-command-line-tool-to-generate-llamaindex-apps-8f7683021191) by LlamaIndex, RAG-SaaS provides a solid foundation for your RAG-based projects.
+Setting up reliable RAG systems can be time-consuming and complex. RAG-SaaS allows developers to focus on fine-tuning and developing their RAG pipeline rather than worrying about packaging it into a usable application. Built on top of [create-llama](https://www.llamaindex.ai/blog/create-llama-a-command-line-tool-to-generate-llamaindex-apps-8f7683021191) by LlamaIndex, RAG-SaaS provides a solid foundation for your RAG-based projects.
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
 1. Clone the repository:
-
-   ```
+   ```bash
    git clone https://github.com/adithya-s-k/RAG-SaaS.git
    cd RAG-SaaS
    ```
 
-2. Install dependencies:
+## 🐳 Docker Compose Deployment
 
-   ```
-   npm install
-   ```
+### Environment Variables
 
-3. Set up your environment variables:
+<details>
+<summary>🔑 How to Set up .env</summary>
 
-   ```
-   cp .env.example .env
-   ```
+### Environment Variables
 
-   Edit the `.env` file with your specific configurations.
+To properly configure and run RAG-SaaS, you need to set up several environment variables. These are divided into three main sections: Frontend, Backend, and Docker Compose. Here's a detailed explanation of each:
 
-4. Run the development server:
+#### Frontend Environment (./frontend/.env.local)
 
-   ```
-   npm run dev
-   ```
+- `NEXT_PUBLIC_SERVER_URL`: (Compulsory) The endpoint URL of your FastAPI server.
+- `NEXT_PUBLIC_CHAT_API`: (Compulsory) Derived from NEXT_SERVER_URL, typically set to `${NEXT_PUBLIC_SERVER_URL}/api/chat`.
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+#### Backend Environment (./backend/.env)
 
-## 🐳 Docker Deployment
+1. Model Configuration:
 
-To deploy RAG-SaaS using Docker:
+   - `MODEL_PROVIDER`: (Compulsory) The AI model provider (e.g., 'openai').
+   - `MODEL`: (Compulsory) The name of the LLM model to use.
+   - `EMBEDDING_MODEL`: (Compulsory) The name of the embedding model.
+   - `EMBEDDING_DIM`: (Compulsory) The dimensionality of the embedding model.
 
-1. Build the Docker image:
+2. OpenAI Configuration:
 
-   ```
-   docker build -t rag-saas .
-   ```
+   - `OPENAI_API_KEY`: (Compulsory) Your OpenAI API key.
 
-2. Run the container:
-   ```
-   docker run -p 3000:3000 rag-saas
-   ```
+3. Application Settings:
+
+   - `CONVERSATION_STARTERS`: (Compulsory) A list of starter questions for users.
+   - `SYSTEM_PROMPT`: (Compulsory) The system prompt for the AI model.
+   - `SYSTEM_CITATION_PROMPT`: (Optional) Additional prompt for citation.
+   - `APP_HOST`: (Compulsory) The host address for the backend (default: '0.0.0.0').
+   - `APP_PORT`: (Compulsory) The port for the backend (default: 8000).
+
+4. Database Configuration:
+
+   - `MONGODB_URI`: (Compulsory) The MongoDB connection URI.
+   - `MONGODB_NAME`: (Compulsory) The MongoDB database name (default: 'RAGSAAS').
+   - `QDRANT_URL`: (Compulsory) The URL for the Qdrant server.
+   - `QDRANT_COLLECTION`: (Compulsory) The Qdrant collection name.
+   - `QDRANT_API_KEY`: (Optional) API key for Qdrant authentication.
+
+5. Authentication:
+
+   - `JWT_SECRET_KEY`: (Compulsory) Secret key for signing JWT tokens.
+   - `JWT_REFRESH_SECRET_KEY`: (Compulsory) Secret key for signing JWT refresh tokens.
+   - `ADMIN_EMAIL`: (Compulsory) Administrator email for application login.
+   - `ADMIN_PASSWORD`: (Compulsory) Administrator password for application login.
+
+6. AWS S3 Configuration (Optional):
+
+   - `AWS_ACCESS_KEY_ID`: AWS Access Key ID.
+   - `AWS_SECRET_ACCESS_KEY`: AWS Secret Access Key.
+   - `AWS_REGION`: AWS Region for your services.
+   - `BUCKET_NAME`: The name of the S3 bucket to use.
+
+7. Observability:
+   - `ARIZE_PHOENIX_ENDPOINT`: (Optional) Endpoint for Arize Phoenix observability.
+
+### Docker Compose Env (./env)
+
+```
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ragsaas/backend:latest
+    container_name: backend
+    ports:
+      - '8000:8000'
+    environment:
+      # MongoDB Configuration
+      MONGODB_NAME: RAGSAAS
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/
+      # Qdrant Configuration
+      QDRANT_COLLECTION: default
+      QDRANT_URL: http://qdrant:6333
+      # QDRANT_API_KEY:
+      # OPENAI_API_KEY is compulsory
+      OPENAI_API_KEY:
+      # Backend Application Configuration
+      MODEL_PROVIDER: openai
+      MODEL: gpt-4o-mini
+      EMBEDDING_MODEL: text-embedding-3-small
+      EMBEDDING_DIM: 1536
+      FILESERVER_URL_PREFIX: http://backend:8000/api/files
+      SYSTEM_PROMPT: 'You are a helpful assistant who helps users with their questions.'
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      JWT_SECRET_KEY:
+      JWT_REFRESH_SECRET_KEY:
+      ARIZE_PHOENIX_ENDPOINT: http://arizephoenix:4317
+```
+
+</details>
 
 For Docker Compose deployment, use:
 
+```bash
+docker compose up
 ```
-docker-compose up
-```
 
-## 🛠️ Configuration
+### Development Mode
 
-### RAG Configurations
+To run the project in development mode:
 
-RAG-SaaS comes with three RAG configurations out of the box. You can switch between these in the Admin Dashboard or modify them in the `config/rag_configs.py` file.
+1. Start the Next.js frontend:
 
-### S3 Integration
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-To enable S3 integration for PDF uploads:
+2. Set up the vector database (Qdrant), database (MongoDB), and observability platform (Arize Phoenix). You can either self-host these using Docker or use hosted solutions:
+
+   Self-hosted options:
+
+   - Qdrant: `docker pull qdrant/qdrant`
+   - MongoDB: `docker pull mongo`
+   - Arize Phoenix: `docker pull arizephoenix/phoenix`
+
+   Hosted options:
+
+   - Qdrant Cloud: https://cloud.qdrant.io/
+   - MongoDB Atlas: https://www.mongodb.com/cloud/atlas
+   - Arize Phoenix: https://app.phoenix.arize.com/
+
+3. Start the FastAPI server:
+   ```bash
+   cd backend
+   pip install -e .
+   python main.py
+   ```
+
+#### S3 Integration
+
+To enable S3 integration for PDF uploads/Ingestion:
 
 1. Set the following environment variables in your `.env` file:
 
    ```
    AWS_ACCESS_KEY_ID=your_access_key
    AWS_SECRET_ACCESS_KEY=your_secret_key
-   AWS_BUCKET_NAME=your_bucket_name
+   AWS_REGION=bucket_region
+   BUCKET_NAME=your_bucket_name
    ```
 
-2. Update the S3 configuration in `config/s3_config.py` if needed.
+2. Start the FastAPI server:
+   ```bash
+   cd backend
+   pip install -e .
+   python main.py
+   ```
+
+## Roadmap
+
+- [x] add support to store ingested data in AWS S3
+- [x] Add Docker compose for each set up
+- [x] Implement Observability
+- [ ] Improve authentication system
+- [ ] Integrate OmniParse API for efficient Data ingestion
+- [ ] Provide more control to Admin over RAG configuration
+- [ ] Implement Advanced and Agentic RAG
 
 ## 👥 Contributing
 
 We welcome contributions to RAG-SaaS! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for more details on how to get started.
 
-## 📄 License
+## 📄 Licensing
 
-RAG-SaaS is open-source software licensed under the [MIT license](LICENSE).
+This project is available under a dual license:
+
+- Apache License 2.0 for students, developers, and individuals
+- GNU General Public License v3.0 for companies and commercial use
+
+See the [LICENSING.md](LICENSING.md) file for more details.
 
 ## 🙏 Acknowledgements
 
-- [LlamaIndex](https://www.llamaindex.ai/) for the create-llama tool
+This project is built on the following frameworks, technologies and tools:
+
+- [LlamaIndex](https://www.llamaindex.ai/) for the create-llama tool and RAG orchestration
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [Next.js](https://nextjs.org/)
 - [MongoDB](https://www.mongodb.com/)
+- [Qdrant](https://qdrant.tech/)
+- [Arize Phoenix](https://docs.arize.com/phoenix)
 
-## 📞 Contact
+## Contact & Support
 
-For any inquiries or support, please open an issue on this repository or contact the maintainers directly.
+### Bug Reports
+
+If you encounter any issues or bugs, please report them in the [Issues](https://github.com/adithya-s-k/RAG-SaaS/issues) tab of our GitHub repository.
+
+### Commercial Use & Custom Solutions
+
+For inquiries regarding:
+
+- Commercial licensing
+- Custom modifications
+- Managed deployment
+- Specialized integrations
+
+Please contact: adithyaskolavi@gmail.com
+
+We're here to help tailor RAG-SaaS to your specific needs and ensure you get the most out of our solution.
+
+## Star History
+
+<p align="center">
+  <a href="https://cognitivelab.in">
+    <img src="https://api.star-history.com/svg?repos=adithya-s-k/RAG-SaaS&type=Date" alt="Star History Chart">
+  </a>
+</p>

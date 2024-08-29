@@ -8,7 +8,7 @@ services:
       - 6333:6333
       - 6334:6334
     networks:
-      - ragapp-network
+      - ragsaas-network
 
   mongodb:
     image: mongo:latest
@@ -19,15 +19,24 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
     networks:
-      - ragapp-network
+      - ragsaas-network
     volumes:
       - mongodb_data:/data/db
+
+  arizephoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: arizephoenix
+    ports:
+      - '6006:6006'
+      - '4317:4317'
+    networks:
+      - ragsaas-network
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ragapp/backend:latest
+    image: ragsaas/backend:latest
     container_name: backend
     ports:
       - '8000:8000'
@@ -39,7 +48,7 @@ services:
       QDRANT_COLLECTION: default
       QDRANT_URL: http://qdrant:6333
       # QDRANT_API_KEY:
-      OPENAI_API_KEY:
+      OPENAI_API_KEY: 
       # Backend Application Configuration
       MODEL_PROVIDER: openai
       MODEL: gpt-4o-mini
@@ -49,19 +58,21 @@ services:
       SYSTEM_PROMPT: 'You are a helpful assistant who helps users with their questions.'
       APP_HOST: 0.0.0.0
       APP_PORT: 8000
-      JWT_SECRET_KEY: 8d0a86e9b6e37090f1bd7fac1f2a5bffb16d8d07b20c8efa1ee5c2bb0c2e7bb9
-      JWT_REFRESH_SECRET_KEY: 892b5f647b4fb79bf6648e670649ec7a63a9f51ff1d695e382ccd4e83e5b4c18
+      JWT_SECRET_KEY: 
+      JWT_REFRESH_SECRET_KEY: 
+      ARIZE_PHOENIX_ENDPOINT: http://arizephoenix:4317
     depends_on:
       - qdrant
       - mongodb
+      - arizephoenix
     networks:
-      - ragapp-network
+      - ragsaas-network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: ragapp/frontend:latest
+    image: ragsaas/frontend:latest
     container_name: frontend
     ports:
       - '3000:3000'
@@ -71,11 +82,11 @@ services:
     depends_on:
       - backend
     networks:
-      - ragapp-network
+      - ragsaas-network
 
 networks:
-  ragapp-network:
-    name: ragapp-network
+  ragsaas-network:
+    name: ragsaas-network
     driver: bridge
 
 volumes:
