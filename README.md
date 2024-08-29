@@ -33,25 +33,42 @@
   <a href="https://github.com/adithya-s-k/RAG-SaaS/pulls">
     <img src="https://img.shields.io/github/issues-pr/adithya-s-k/RAG-SaaS" alt="GitHub Pull Requests">
   </a>
-  <a href="https://github.com/adithya-s-k/RAG-SaaS/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/adithya-s-k/RAG-SaaS" alt="License">
-  </a>
 </p>
 
-## Features
 
-- 🔐 Basic Authentication
-- 💬 Chat History Tracking
-- 🧠 Multiple RAG Variations
-  - Basic RAG
-  - Two additional configurations
-- 👨‍💼 Admin Dashboard
-  - 📥 Data Ingestion
-  - 📊 Monitoring
-  - 👁️ Observability
-  - 🔄 RAG Configuration Switching
-- 🗄️ S3 Integration for PDF uploads
-- 🐳 Easy Deployment with Docker / Docker Compose
+<table>
+    <tr>
+        <th>Features</th>
+        <th>Demo Video</th>
+    </tr>
+    <tr>
+        <td>
+            <ul>
+                <li>🔐 Basic Authentication</li>
+                <li>💬 Chat History Tracking</li>
+                <li>🧠 Multiple RAG Variations
+                    <ul>
+                        <li>Basic RAG</li>
+                        <li>Two additional configurations</li>
+                    </ul>
+                </li>
+                <li>👨‍💼 Admin Dashboard
+                    <ul>
+                        <li>📥 Data Ingestion</li>
+                        <li>📊 Monitoring</li>
+                        <li>👁️ Observability</li>
+                        <li>🔄 RAG Configuration Switching</li>
+                    </ul>
+                </li>
+                <li>🗄️ S3 Integration for PDF uploads</li>
+                <li>🐳 Easy Deployment with Docker / Docker Compose</li>
+            </ul>
+        </td>
+        <td>
+            <video width="100%" src="https://github.com/user-attachments/assets/f6de3ae5-bcc9-480c-bc46-dee69ec22795" alt="Demo Video RAG SAAS">
+        </td>
+    </tr>
+</table>
 
 ## Tech Stack
 
