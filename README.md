@@ -1,10 +1,15 @@
+<h2 align="center">RAG SaaS</h2>
 <p align="center">
-  <img alt="RAG-SaaS Logo" src="./assets/banner.png" width="60%">
+  Ship RAG solutions quickly⚡
+</p>
+
+<p align="center">
+  <img alt="RAG-SaaS Logo" src="./assets/banner.png" width="80%">
 </p>
 
 <p align="center">
   <strong>A complete Software-as-a-Service (SaaS) for Retrieval-Augmented Generation (RAG) and Agentic based applications.</strong><br>
-  Customizable, end-to-end solution for rapid RAG system deployment.
+
 </p>
 
 <p align="center">
@@ -43,6 +48,7 @@
 - 👨‍💼 Admin Dashboard
   - 📥 Data Ingestion
   - 📊 Monitoring
+  - 👁️ Observability
   - 🔄 RAG Configuration Switching
 - 🗄️ S3 Integration for PDF uploads
 - 🐳 Easy Deployment with Docker / Docker Compose
@@ -130,6 +136,21 @@ To properly configure and run RAG-SaaS, you need to set up several environment v
 7. Observability:
    - `ARIZE_PHOENIX_ENDPOINT`: (Optional) Endpoint for Arize Phoenix observability.
 
+#### S3 Integration
+
+To enable S3 integration for PDF uploads/Ingestion:
+
+1. Set the following environment variables in your `.env` file:
+
+```
+
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=bucket_region
+BUCKET_NAME=your_bucket_name
+
+```
+
 ### Docker Compose Env (./env)
 
 ```
@@ -175,9 +196,11 @@ docker compose up
 
 ### Development Mode
 
-To run the project in development mode:
+To run the project in development mode, follow these steps:
 
-1. Start the Next.js frontend:
+1. **Start the Next.js Frontend:**
+
+   Navigate to the `frontend` directory and install the required dependencies. Then, run the development server:
 
    ```bash
    cd frontend
@@ -185,46 +208,66 @@ To run the project in development mode:
    npm run dev
    ```
 
-2. Set up the vector database (Qdrant), database (MongoDB), and observability platform (Arize Phoenix). You can either self-host these using Docker or use hosted solutions:
+2. **Set Up the Vector Database (Qdrant), Database (MongoDB), and Observability Platform (Arize Phoenix):**
 
-   Self-hosted options:
+   You can either self-host these services using Docker or use hosted solutions.
 
-   - Qdrant: `docker pull qdrant/qdrant`
-   - MongoDB: `docker pull mongo`
-   - Arize Phoenix: `docker pull arizephoenix/phoenix`
+   **Self-Hosted Options:**
 
-   Hosted options:
+   - Qdrant:
 
-   - Qdrant Cloud: https://cloud.qdrant.io/
-   - MongoDB Atlas: https://www.mongodb.com/cloud/atlas
-   - Arize Phoenix: https://app.phoenix.arize.com/
+     ```bash
+     docker pull qdrant/qdrant
+     ```
 
-3. Start the FastAPI server:
+   - MongoDB:
+
+     ```bash
+     docker pull mongo
+     ```
+
+   - Arize Phoenix:
+     ```bash
+     docker pull arizephoenix/phoenix
+     ```
+
+   **Hosted Options:**
+
+   - Qdrant Cloud: [Qdrant Cloud](https://cloud.qdrant.io/)
+   - MongoDB Atlas: [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Arize Phoenix: [Arize Phoenix](https://app.phoenix.arize.com/)
+
+3. **Start the FastAPI Server:**
+
+   Navigate to the `backend` directory and set up the Python environment. You can use either Conda or Python's built-in `venv`:
+
    ```bash
    cd backend
+   ```
+
+   **Using Conda:**
+
+   ```bash
+   conda create -n ragsaas-venv python=3.11
+   conda activate ragsaas-venv
+   ```
+
+   **Using Python's `venv`:**
+
+   ```bash
+   python -m venv ragsaas-venv
+   \ragsaas-venv\Scripts\activate  # On Windows
+   source ragsaas-venv/bin/activate  # On macOS/Linux
+   ```
+
+   Install the required dependencies and run the server:
+
+   ```bash
    pip install -e .
    python main.py
    ```
 
-#### S3 Integration
-
-To enable S3 integration for PDF uploads/Ingestion:
-
-1. Set the following environment variables in your `.env` file:
-
-   ```
-   AWS_ACCESS_KEY_ID=your_access_key
-   AWS_SECRET_ACCESS_KEY=your_secret_key
-   AWS_REGION=bucket_region
-   BUCKET_NAME=your_bucket_name
-   ```
-
-2. Start the FastAPI server:
-   ```bash
-   cd backend
-   pip install -e .
-   python main.py
-   ```
+---
 
 ## Roadmap
 
