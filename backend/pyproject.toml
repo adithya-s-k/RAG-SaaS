@@ -27,6 +27,13 @@ fastapi-mail = "^1.4.1"
 beanie = "^1.26.0"
 python-decouple = "^3.8"
 boto3 = "^1.35.6"
+openinference-instrumentation = "^0.1.12"
+openinference-instrumentation-llama-index = "^2.2.1"
+openinference-instrumentation-openai = "^0.1.12"
+openinference-semantic-conventions = "^0.1.9"
+opentelemetry-api = "^1.26.0"
+opentelemetry-exporter-otlp = "^1.26.0"
+arize-phoenix = {extras = ["evals"], version = "^4.19.0"}
 
 [tool.poetry.dependencies.uvicorn]
 extras = [ "standard" ]
