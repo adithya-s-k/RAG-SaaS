@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <strong>A complete Software-as-a-Service (SaaS) for Retrieval-Augmented Generation (RAG) and Agentic based applications.</strong><br>
+  <strong>A end to end SaaS Solution for Retrieval-Augmented Generation (RAG) <br> and Agentic based applications.</strong><br>
 
 </p>
 
@@ -191,7 +191,13 @@ BUCKET_NAME=your_bucket_name
 For Docker Compose deployment, use:
 
 ```bash
-docker compose up
+docker compose up -d
+```
+
+Pull down the containers
+
+```bash
+docker compose down
 ```
 
 ### Development Mode
