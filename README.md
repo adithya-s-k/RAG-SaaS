@@ -36,6 +36,7 @@
 </p>
 
 
+
 <table>
     <tr>
         <th>Features</th>
@@ -65,10 +66,18 @@
             </ul>
         </td>
         <td>
-            <video width="100%" src="https://github.com/user-attachments/assets/f6de3ae5-bcc9-480c-bc46-dee69ec22795" alt="Demo Video RAG SAAS">
+          <div align="center">
+  
+![f937cd54-217f-4106-81b6-56636a17306f (1)](https://github.com/user-attachments/assets/2f2c75fa-a3f0-4311-9a43-554d8cb3e04e)
+</div>
         </td>
     </tr>
 </table>
+
+<div align="center">
+<video width="100%" src="https://github.com/user-attachments/assets/f6de3ae5-bcc9-480c-bc46-dee69ec22795" alt="Demo Video RAG SAAS">
+</div>
+
 
 ## Tech Stack
 
