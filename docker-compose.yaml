@@ -48,7 +48,7 @@ services:
       QDRANT_COLLECTION: default
       QDRANT_URL: http://qdrant:6333
       # QDRANT_API_KEY:
-      OPENAI_API_KEY: 
+      OPENAI_API_KEY:
       # Backend Application Configuration
       MODEL_PROVIDER: openai
       MODEL: gpt-4o-mini
@@ -58,9 +58,11 @@ services:
       SYSTEM_PROMPT: 'You are a helpful assistant who helps users with their questions.'
       APP_HOST: 0.0.0.0
       APP_PORT: 8000
-      JWT_SECRET_KEY: 
-      JWT_REFRESH_SECRET_KEY: 
-      ARIZE_PHOENIX_ENDPOINT: http://arizephoenix:4317
+      ADMIN_EMAIL: admin@ragsaas.com
+      ADMIN_PASSWORD: ragsaas
+      JWT_SECRET_KEY:
+      JWT_REFRESH_SECRET_KEY:
+      ARIZE_PHOENIX_ENDPOINT: http://arizephoenix:6006
     depends_on:
       - qdrant
       - mongodb
